@@ -200,10 +200,10 @@ fun CheckInScreen(
                 ?.takeIf { it in listOf("morning", "afternoon", "evening") }
                 ?.let { "$it check-in" },
         )
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(6.dp))
         Title("How are you,\nright now?", "There’s no right answer. Just a moment for you.")
         Row(
-            Modifier.padding(vertical = 28.dp).glass(24.dp).padding(4.dp),
+            Modifier.padding(vertical = 10.dp).glass(24.dp).padding(4.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             ChoiceChip("Mood meter", mode == 0, { mode = 0 })
@@ -212,7 +212,7 @@ fun CheckInScreen(
         if (mode == 0) {
             SolaContent.moods.chunked(4).forEach { row ->
                 Row(
-                    Modifier.fillMaxWidth().padding(bottom = 15.dp),
+                    Modifier.fillMaxWidth().padding(bottom = 6.dp),
                     horizontalArrangement = Arrangement.spacedBy(7.dp),
                 ) {
                     row.forEach { mood ->
@@ -268,7 +268,7 @@ fun CheckInScreen(
         }
         Text(
             "Feeling ${chosenMood.label.lowercase()}.",
-            Modifier.padding(top = 16.dp, bottom = 22.dp),
+            Modifier.padding(top = 8.dp, bottom = 10.dp),
             fontSize = 18.sp,
             fontWeight = FontWeight.Light,
         )
@@ -284,7 +284,7 @@ fun CheckInScreen(
             Modifier.fillMaxWidth(),
             enabled = !saved,
         )
-        Body("Each day you check in, a new branch grows.", Modifier.padding(vertical = 18.dp), true)
+        Body("Each day you check in, a new branch grows.", Modifier.padding(vertical = 8.dp), true)
     }
 }
 

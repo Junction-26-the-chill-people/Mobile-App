@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.view.View
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.example.junction.sola.data.*
@@ -71,6 +72,33 @@ class SolaUiTest {
         compose.onNodeWithContentDescription("Check in. How are you?").performClick()
         compose.onNodeWithText("Rest here").performScrollTo().performClick()
         compose.onNodeWithText("Your garden").assertExists()
+    }
+
+    @Test
+    @Config(qualifiers = "w384dp-h784dp-mdpi")
+    fun theFourByFourCheckInFitsOnePhoneScreenWithoutScrolling() {
+        compose.setContent {
+            SolaApp(
+                store(SolaState(onboardingComplete = true)),
+                SolaScreen.CHECK_IN,
+                motion = false,
+            )
+        }
+        compose.onNodeWithText("Rest here").assertIsDisplayed()
+        compose.onNodeWithText("Each day you check in, a new branch grows.").assertIsDisplayed()
+        val scroll =
+            compose
+                .onNode(hasScrollAction())
+                .fetchSemanticsNode()
+                .config[SemanticsProperties.VerticalScrollAxisRange]
+        compose.runOnIdle {
+            assertEquals(
+                "The whole check-in should fit at the phone's usable size",
+                0f,
+                scroll.maxValue(),
+                .5f,
+            )
+        }
     }
 
     @Test
