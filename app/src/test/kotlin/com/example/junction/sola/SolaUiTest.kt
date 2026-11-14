@@ -28,6 +28,26 @@ class SolaUiTest {
         SolaStore(RuntimeEnvironment.getApplication(), state)
 
     @Test
+    @Config(qualifiers = "w640dp-h320dp-land-mdpi")
+    fun theWelcomeActionIsReachableInLandscapeWithLargeText() {
+        RuntimeEnvironment.setFontScale(1.5f)
+        compose.setContent { SolaApp(store(), SolaScreen.WELCOME, motion = false) }
+        compose.onNodeWithText("hello").assertExists()
+        compose.onNodeWithText("Begin").performScrollTo().performClick()
+        compose.onNodeWithText("Come on in.").assertExists()
+    }
+
+    @Test
+    @Config(qualifiers = "w320dp-h640dp-mdpi")
+    fun theWelcomeActionIsReachableAtTwiceTheNormalFontSize() {
+        RuntimeEnvironment.setFontScale(2f)
+        compose.setContent { SolaApp(store(), SolaScreen.WELCOME, motion = false) }
+        compose.onNodeWithText("hello").assertExists()
+        compose.onNodeWithText("Begin").performScrollTo().performClick()
+        compose.onNodeWithText("Come on in.").assertExists()
+    }
+
+    @Test
     fun aVisitArrivingWhileTodayIsOpenRoutesAndSavesItsSession() {
         val journal = store(SolaState(onboardingComplete = true))
         val visit = CheckInSession("warm-ui-visit", "evening", SolaDates.key())

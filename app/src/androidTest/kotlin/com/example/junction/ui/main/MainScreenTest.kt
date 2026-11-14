@@ -34,7 +34,7 @@ class MainScreenTest {
     fun launcherShowsTheNativeWelcomeAndCanEnterToday() {
         launch("welcome")
         compose.onNodeWithText("hello").assertExists()
-        compose.onNodeWithText("Skip to home").performScrollTo().performClick()
+        compose.onNodeWithText("Skip to home").performClick()
         compose.onNodeWithText("Welcome back,").assertExists()
         compose.onNodeWithContentDescription("Check in. How are you?").assertExists()
     }

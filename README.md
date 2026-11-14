@@ -11,7 +11,7 @@ Use JDK 17+ and Android SDK 36:
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
-On Windows use `gradlew.bat`. The installed app is **Junction** (`com.example.junction`). Begin your own profile or choose **Explore the sample garden**. Photos use Android’s picker; voice uses the phone’s speech-to-text service when available.
+On Windows use `gradlew.bat`. The installed app is **Junction** (`com.example.junction`). The welcome draws its original handwritten **hello**, then fades in the subtitle; tap the tree or lettering to replay. Begin your own profile or choose **Explore the sample garden**. Photos use Android’s picker; voice uses the phone’s speech-to-text service when available.
 
 ## Telegram over USB
 

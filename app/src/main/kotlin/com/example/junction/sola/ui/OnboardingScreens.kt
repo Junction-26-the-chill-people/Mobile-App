@@ -14,8 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
@@ -29,6 +27,10 @@ fun OnboardingScreen(
     navigate: (SolaScreen) -> Unit,
     back: () -> Unit,
 ) {
+    if (screen == SolaScreen.WELCOME) {
+        WelcomeScreen(store, navigate)
+        return
+    }
     val step =
         listOf(
                 SolaScreen.WELCOME,
@@ -86,41 +88,7 @@ fun OnboardingScreen(
             label = if (step > 0) "Sola · ${step} of 6" else "Sola",
         )
         when (screen) {
-            SolaScreen.WELCOME -> {
-                val welcomeGarden = remember { SolaContent.demo() }
-                Spacer(Modifier.height(28.dp))
-                Text(
-                    "hello",
-                    fontSize = 76.sp,
-                    fontWeight = FontWeight.Light,
-                    fontStyle = FontStyle.Italic,
-                    letterSpacing = (-5).sp,
-                )
-                Body("thanks for dropping by", centered = true)
-                Box(Modifier.height(290.dp).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    GlassOrb(Modifier.size(245.dp), Color(0xFFCBD7C0), sceneTime()) {
-                        GardenArtwork(welcomeGarden, Modifier.width(200.dp).padding(top = 20.dp))
-                    }
-                }
-                Title(
-                    "A little space for you.",
-                    "Check in, notice the small things,\nand watch your garden grow.",
-                )
-                Spacer(Modifier.height(30.dp))
-                PrimaryButton("Begin", { navigate(SolaScreen.ACCOUNT) }, Modifier.fillMaxWidth())
-                TextButton({
-                    store.update { it.copy(onboardingComplete = true) }
-                    navigate(SolaScreen.TODAY)
-                }) {
-                    Text("Skip to home", color = Muted)
-                }
-                TextButton({
-                    store.useSample(true)
-                    navigate(SolaScreen.TODAY)
-                }) {
-                    Text("Explore the sample garden", fontSize = 12.sp, color = Muted)
-                }
-            }
+            SolaScreen.WELCOME -> Unit
             SolaScreen.ACCOUNT -> {
                 Spacer(Modifier.height(28.dp))
                 Title("Come on in.", "Make this little space your own.")
