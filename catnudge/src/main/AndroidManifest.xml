@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" />
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.HOME" />
+        </intent>
+    </queries>
+    <application>
+        <activity
+            android:name="com.junction.catnudge.CatNudgeResumeActivity"
+            android:theme="@style/CatNudge.ResumeTheme"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:exported="false" />
+        <service
+            android:name="com.junction.catnudge.CatNudgeService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Owner-enabled cat invitations: maintains a visible interactive overlay or waits for an unlocked active screen before showing a persisted invitation. Screen-off pauses the visit. The owner can disable monitoring from its notification." />
+        </service>
+    </application>
+</manifest>
