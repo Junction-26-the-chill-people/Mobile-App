@@ -174,7 +174,14 @@ fun TodayScreen(s: SolaState, store: SolaStore, navigate: (SolaScreen) -> Unit) 
 }
 
 @Composable
-fun CheckInScreen(store: SolaStore, navigate: (SolaScreen) -> Unit, back: () -> Unit) {
+fun CheckInScreen(
+    store: SolaStore,
+    navigate: (SolaScreen) -> Unit,
+    back: () -> Unit,
+    saveMood: (SolaMood) -> Unit = { store.saveMood(it) },
+) {
+    val session = store.state.collectAsState().value.activeCheckIn
+    var saved by rememberSaveable { mutableStateOf(false) }
     var mode by rememberSaveable { mutableIntStateOf(0) }
     var selectedId by rememberSaveable { mutableStateOf("calm") }
     var level by rememberSaveable { mutableIntStateOf(3) }
@@ -185,7 +192,14 @@ fun CheckInScreen(store: SolaStore, navigate: (SolaScreen) -> Unit, back: () -> 
         Modifier.fillMaxSize().padding(horizontal = 24.dp).verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        TopBar(back, { navigate(SolaScreen.SETTINGS) })
+        TopBar(
+            back,
+            { navigate(SolaScreen.SETTINGS) },
+            session
+                ?.period
+                ?.takeIf { it in listOf("morning", "afternoon", "evening") }
+                ?.let { "$it check-in" },
+        )
         Spacer(Modifier.height(20.dp))
         Title("How are you,\nright now?", "There’s no right answer. Just a moment for you.")
         Row(
@@ -261,10 +275,14 @@ fun CheckInScreen(store: SolaStore, navigate: (SolaScreen) -> Unit, back: () -> 
         PrimaryButton(
             "Rest here",
             {
-                store.saveMood(chosenMood)
-                navigate(SolaScreen.GARDEN)
+                if (!saved) {
+                    saved = true
+                    saveMood(chosenMood)
+                    navigate(SolaScreen.GARDEN)
+                }
             },
             Modifier.fillMaxWidth(),
+            enabled = !saved,
         )
         Body("Each day you check in, a new branch grows.", Modifier.padding(vertical = 18.dp), true)
     }

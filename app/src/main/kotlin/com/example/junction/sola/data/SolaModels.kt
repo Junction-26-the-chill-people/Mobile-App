@@ -54,6 +54,15 @@ data class MoodLog(
     val value: Int,
     val label: String,
     val quadrant: String,
+    val checkIn: CheckInSession? = null,
+)
+
+/** Acceptance opens this session; only saving a mood completes it. */
+data class CheckInSession(
+    val id: String,
+    val period: String,
+    val date: String,
+    val scheduledAt: Long? = null,
 )
 
 data class DiaryNote(
@@ -83,9 +92,9 @@ data class CheckInWindow(val count: Int = 1, val time: String)
 
 data class SolaPreferences(
     val cadence: String = "Every day",
-    val morning: CheckInWindow = CheckInWindow(1, "09:00"),
+    val morning: CheckInWindow = CheckInWindow(1, "10:00"),
     val afternoon: CheckInWindow = CheckInWindow(0, "14:00"),
-    val evening: CheckInWindow = CheckInWindow(1, "20:00"),
+    val evening: CheckInWindow = CheckInWindow(1, "21:00"),
     val ideaDirection: String = "balanced",
     val energyTier: String = "BIGGER",
     val includeFriends: Boolean = true,
@@ -112,6 +121,7 @@ data class SolaState(
     val monthlyIntention: String = "",
     val diaryDraft: String = "",
     val draftPhoto: String? = null,
+    val activeCheckIn: CheckInSession? = null,
 ) {
     val greeting: String
         get() = profile.name.trim().substringBefore(' ').ifBlank { "there" }
@@ -291,7 +301,8 @@ object SolaDates {
 
     fun parseKey(key: String): Long = runCatching {
         SimpleDateFormat("yyyy-MM-dd", Locale.ROOT).parse(key)?.time ?: 0L
-    }.getOrDefault(0L)
+    }
+        .getOrDefault(0L)
 
     fun dayOffset(time: Long, days: Int): Long =
         Calendar.getInstance()

@@ -145,6 +145,14 @@ class CatNudgeService : Service() {
                 handler.postDelayed(readyCheck, remaining)
             }
             if (head == null) { updateNotification(); return }
+            val hostReady = try { CatNudge.configuration?.canPresent?.invoke(applicationContext, head.request) != false }
+                catch (error: RuntimeException) { Log.e(CatNudge.TAG, "Host readiness check failed", error); false }
+            if (!hostReady) {
+                removeOverlay()
+                handler.postDelayed(appOpenCheck, APP_OPEN_POLL_MS)
+                updateNotification()
+                return
+            }
             if (overlay != null) { updateNotification(); return }
             if (!CatNudge.canDrawOverlays(this)) {
                 CatNudgeNotifications.postResume(this)

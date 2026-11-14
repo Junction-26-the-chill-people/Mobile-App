@@ -35,7 +35,13 @@ import kotlinx.coroutines.launch
  * registry.
  */
 @Composable
-fun SolaApp(store: SolaStore, initialScreen: SolaScreen? = null, motion: Boolean = true) {
+fun SolaApp(
+    store: SolaStore,
+    initialScreen: SolaScreen? = null,
+    motion: Boolean = true,
+    onScreenChanged: (SolaScreen) -> Unit = {},
+    onSaveMood: (SolaStore, SolaMood) -> Unit = { journal, mood -> journal.saveMood(mood) },
+) {
     val s by store.state.collectAsState()
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -43,11 +49,14 @@ fun SolaApp(store: SolaStore, initialScreen: SolaScreen? = null, motion: Boolean
     val scope = rememberCoroutineScope()
     var screenName by rememberSaveable {
         mutableStateOf(
-            (initialScreen ?: if (s.onboardingComplete) SolaScreen.TODAY else SolaScreen.WELCOME)
+            (initialScreen
+                    ?: if (s.activeCheckIn != null) SolaScreen.CHECK_IN
+                    else if (s.onboardingComplete) SolaScreen.TODAY else SolaScreen.WELCOME)
                 .name
         )
     }
     val screen = SolaScreen.valueOf(screenName)
+    SideEffect { onScreenChanged(screen) }
     var history by rememberSaveable { mutableStateOf(listOf<String>()) }
     var bridgeStatus by remember {
         mutableStateOf(
@@ -74,6 +83,9 @@ fun SolaApp(store: SolaStore, initialScreen: SolaScreen? = null, motion: Boolean
                 screen.ordinal in 1..6 -> SolaScreen.entries[screen.ordinal - 1].name
                 else -> SolaScreen.TODAY.name
             }
+    }
+    LaunchedEffect(s.activeCheckIn?.id) {
+        if (s.activeCheckIn != null && screen != SolaScreen.CHECK_IN) navigate(SolaScreen.CHECK_IN)
     }
     fun gateway() = TelegramGateway(s.preferences.backendUrl, debug)
     fun openBot() {
@@ -204,7 +216,8 @@ fun SolaApp(store: SolaStore, initialScreen: SolaScreen? = null, motion: Boolean
                         SolaScreen.RHYTHM,
                         SolaScreen.FRIEND -> OnboardingScreen(screen, s, store, ::navigate, ::back)
                         SolaScreen.TODAY -> TodayScreen(s, store, ::navigate)
-                        SolaScreen.CHECK_IN -> CheckInScreen(store, ::navigate, ::back)
+                        SolaScreen.CHECK_IN ->
+                            CheckInScreen(store, ::navigate, ::back, { onSaveMood(store, it) })
                         SolaScreen.GARDEN ->
                             GardenScreen(
                                 s,

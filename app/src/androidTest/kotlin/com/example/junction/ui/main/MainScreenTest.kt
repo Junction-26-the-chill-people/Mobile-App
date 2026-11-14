@@ -53,12 +53,19 @@ class MainScreenTest {
     }
 
     @Test
-    fun existingCatAdbDestinationStillOpensItsReservedRoute() {
+    fun catDestinationOpensTheNativeCheckInAndSavesToTheGarden() {
         scenario =
             ActivityScenario.launch(
                 Intent(ApplicationProvider.getApplicationContext(), MainActivity::class.java)
                     .setAction(NudgeController.ACTION_OPEN_QUESTIONS)
+                    .putExtra("preview_screen", "check_in")
+                    .putExtra("preview_demo", false)
+                    .putExtra("preview_motion", false)
+                    .putExtra("nudge_id", "device-integration-test")
             )
-        compose.onNodeWithText("<reserved for future>").assertExists()
+        compose.onNodeWithText("How are you,\nright now?").assertExists()
+        compose.onNodeWithContentDescription("Calm mood").performClick()
+        compose.onNodeWithText("Rest here").performScrollTo().performClick()
+        compose.onNodeWithText("Your garden").assertExists()
     }
 }

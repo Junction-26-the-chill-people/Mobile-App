@@ -10,12 +10,49 @@ import org.json.JSONObject
  * Device-local prototype data. Sample mode has a separate record and never replaces a real journal.
  */
 class SolaStore(context: Context, preview: SolaState? = null) {
+    companion object {
+        const val PREFS = "sola_local_v1"
+
+        fun personal(context: Context): SolaState = runCatching {
+            context
+                .getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                .getString("personal", null)
+                ?.let(SolaJson::decode) ?: SolaState()
+        }
+            .getOrDefault(SolaState())
+            .copy(demo = false)
+    }
+
     private val filesDir = context.filesDir
-    private val prefs = context.getSharedPreferences("sola_local_v1", Context.MODE_PRIVATE)
+    private val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
     private val ephemeral = preview != null
     private var sample = preview?.demo ?: prefs.getBoolean("sample_mode", false)
     private val mutable = MutableStateFlow(preview ?: read(sample))
     val state = mutable.asStateFlow()
+    private val changes =
+        android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (
+                key == null || key == "sample_mode" || key == if (sample) "sample" else "personal"
+            ) {
+                sample = prefs.getBoolean("sample_mode", false)
+                mutable.value = read(sample)
+            }
+        }
+
+    init {
+        if (!ephemeral) prefs.registerOnSharedPreferenceChangeListener(changes)
+    }
+
+    val isPreview: Boolean
+        get() = ephemeral
+
+    fun openCheckIn(session: CheckInSession): Boolean {
+        if (sample) useSample(false)
+        if (!ephemeral) mutable.value = read(sample)
+        if (state.value.moods.any { it.checkIn?.id == session.id }) return false
+        update { it.copy(activeCheckIn = session) }
+        return true
+    }
 
     private fun read(demo: Boolean): SolaState = runCatching {
         val text = prefs.getString(if (demo) "sample" else "personal", null)
@@ -27,8 +64,12 @@ class SolaStore(context: Context, preview: SolaState? = null) {
 
     @Synchronized
     fun update(change: (SolaState) -> SolaState) {
-        val next = change(mutable.value).copy(demo = sample)
-        if (next == mutable.value) return
+        val previous = if (ephemeral) mutable.value else read(sample)
+        val next = change(previous).copy(demo = sample)
+        if (next == previous) {
+            mutable.value = next
+            return
+        }
         if (!ephemeral)
             prefs
                 .edit()
@@ -38,7 +79,7 @@ class SolaStore(context: Context, preview: SolaState? = null) {
             fun photos(state: SolaState) =
                 state.diary.mapNotNull { it.photo } + listOfNotNull(state.draftPhoto)
             val kept = (photos(next) + photos(read(!sample))).toSet()
-            photos(mutable.value)
+            photos(previous)
                 .distinct()
                 .filterNot { it in kept }
                 .forEach { relative ->
@@ -60,6 +101,9 @@ class SolaStore(context: Context, preview: SolaState? = null) {
     }
 
     fun saveMood(mood: SolaMood, now: Long = System.currentTimeMillis()) = update {
+        val active = it.activeCheckIn
+        if (active != null && it.moods.any { mood -> mood.checkIn?.id == active.id })
+            return@update it.copy(activeCheckIn = null)
         it.copy(
             moods =
                 it.moods +
@@ -68,7 +112,9 @@ class SolaStore(context: Context, preview: SolaState? = null) {
                         value = mood.value,
                         label = mood.label,
                         quadrant = mood.quadrant,
-                    )
+                        checkIn = active,
+                    ),
+            activeCheckIn = null,
         )
     }
 
@@ -105,6 +151,27 @@ class SolaStore(context: Context, preview: SolaState? = null) {
  * Explicit versioned JSON keeps this feature independent of a future shared database/auth schema.
  */
 object SolaJson {
+    private fun session(value: CheckInSession?) = value?.let {
+        obj(
+            "id" to it.id,
+            "period" to it.period,
+            "date" to it.date,
+            "scheduledAt" to it.scheduledAt,
+        )
+    }
+
+    private fun readSession(value: JSONObject?): CheckInSession? =
+        value
+            ?.takeIf { it.optString("id").isNotBlank() }
+            ?.let {
+                CheckInSession(
+                    it.getString("id"),
+                    it.optString("period"),
+                    it.optString("date"),
+                    if (it.isNull("scheduledAt")) null else it.optLong("scheduledAt"),
+                )
+            }
+
     private fun obj(vararg fields: Pair<String, Any?>) =
         JSONObject().apply { fields.forEach { put(it.first, it.second ?: JSONObject.NULL) } }
 
@@ -130,6 +197,7 @@ object SolaJson {
         obj(
                 "version" to 1,
                 "onboardingComplete" to s.onboardingComplete,
+                "activeCheckIn" to session(s.activeCheckIn),
                 "demo" to s.demo,
                 "profile" to
                     s.profile.let {
@@ -181,6 +249,7 @@ object SolaJson {
                             "value" to it.value,
                             "label" to it.label,
                             "quadrant" to it.quadrant,
+                            "checkIn" to session(it.checkIn),
                         )
                     },
                 "diary" to
@@ -253,9 +322,9 @@ object SolaJson {
             preferences =
                 SolaPreferences(
                     r.optString("cadence", "Every day"),
-                    readWindow("morning", CheckInWindow(1, "09:00")),
+                    readWindow("morning", CheckInWindow(1, "10:00")),
                     readWindow("afternoon", CheckInWindow(0, "14:00")),
-                    readWindow("evening", CheckInWindow(1, "20:00")),
+                    readWindow("evening", CheckInWindow(1, "21:00")),
                     r.optString("ideaDirection", "balanced"),
                     r.optString("energyTier", "BIGGER"),
                     r.optBoolean("includeFriends", true),
@@ -281,6 +350,7 @@ object SolaJson {
                         it.optInt("value").coerceIn(0, 100),
                         it.optString("label"),
                         it.optString("quadrant"),
+                        readSession(it.optJSONObject("checkIn")),
                     )
                 },
             diary =
@@ -313,6 +383,7 @@ object SolaJson {
                     )
                 },
             monthlyIntention = o.optString("monthlyIntention"),
+            activeCheckIn = readSession(o.optJSONObject("activeCheckIn")),
             diaryDraft = o.optString("diaryDraft"),
             draftPhoto = o.nullable("draftPhoto"),
         )

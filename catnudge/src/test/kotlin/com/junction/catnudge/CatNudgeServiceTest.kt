@@ -77,6 +77,23 @@ class CatNudgeServiceTest {
         assertNotNull(shadowOf(service).lastForegroundNotification)
     }
 
+    @Test fun hostEditingGateDefersTheOverlayWithoutConsumingItsRequest() {
+        var allowed=false
+        CatNudge.configure(application,CatNudge.configuration!!.copy(canPresent={_,_->allowed}))
+        start(manual());idle(100)
+        assertTrue(overlays().isEmpty());assertEquals(1,CatNudge.pendingRequests(application).size)
+        allowed=true;CatNudge.refresh(application);idle(100)
+        assertEquals(1,overlays().size)
+    }
+
+    @Test fun cancellingACompletedHostVisitRetainsOtherPendingInvitations() {
+        CatNudge.enqueue(application,manual().copy(id="first"))
+        CatNudge.enqueue(application,manual().copy(id="second"))
+        assertTrue(CatNudge.dismiss(application,"first"))
+        assertFalse(CatNudge.dismiss(application,"first"))
+        assertEquals(listOf("second"),CatNudge.pendingRequests(application).map {it.id})
+    }
+
     @Test fun anAutomaticVisitWaitsForFifteenContinuousSecondsOnAnUnlockedScreen() {
         start(automatic())
         idle(14_999)

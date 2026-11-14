@@ -4,7 +4,7 @@ See [README.md](README.md) for setup, daily quiz timing and ADB commands, and [A
 
 The widget is in `:catnudge`; daily quiz policy and destinations are in `:app`. Default daily slots are 10:00 and 21:00 local time, gated by 15 continuous unlocked seconds. Pending visits and their message stage survive screen-off. Usage Access is optional. Manual ADB previews can bypass the initial wait with the default command; add `--ez wait_ready true` to exercise the daily readiness gate.
 
-The final plea waits for a third outside tap. Yes/card/parcel opens the registered host destination. No message-stage timer dismisses the visit.
+The final plea waits for a third outside tap. Yes/card/parcel opens the native personal “How are you?” check-in. “Rest here” saves a mood linked to that visit, then opens the garden. Accepting the overlay alone does not complete a daily log. No message-stage timer dismisses the visit.
 
 ## Android references
 

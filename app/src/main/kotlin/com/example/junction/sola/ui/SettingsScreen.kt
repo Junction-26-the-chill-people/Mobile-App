@@ -89,6 +89,7 @@ fun SettingsScreen(
     checkBridge: () -> Unit,
     openBot: () -> Unit,
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     var panel by rememberSaveable { mutableStateOf<String?>(null) }
     var editFriend by remember { mutableStateOf<SolaFriend?>(null) }
     var friendEditor by remember { mutableStateOf(false) }
@@ -162,8 +163,9 @@ fun SettingsScreen(
             SolaDialog("Your gentle rhythm", { panel = null }) {
                 RhythmControls(s.preferences) { v -> store.update { it.copy(preferences = v) } }
                 Body(
-                    "Saved preferences. Scheduled invitations will be connected when the cat widget is integrated."
+                    "Changes apply to future visits. A visit already waiting for you keeps its place."
                 )
+                ReminderControls(!s.demo && !store.isPreview)
                 PrimaryButton("Done", { panel = null }, Modifier.fillMaxWidth())
             }
         "ideas" ->
@@ -420,6 +422,8 @@ fun SettingsScreen(
                 PrimaryButton(
                     if (s.demo) "Reset sample" else "Clear local data",
                     {
+                        if (!s.demo && !store.isPreview)
+                            com.example.junction.dailyquiz.DailyQuizScheduler.reset(context)
                         store.resetCurrent()
                         panel = null
                         navigate(if (s.demo) SolaScreen.TODAY else SolaScreen.WELCOME)

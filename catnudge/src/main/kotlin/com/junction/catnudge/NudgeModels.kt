@@ -47,4 +47,6 @@ data class NudgeConfiguration(
     val onOutcome: (Context, NudgeRequest, NudgeOutcome) -> Unit = { _, _, _ -> },
     val onMonitorCheck: (Context) -> Unit = {},
     val onMonitoringChanged: (Context, Boolean) -> Unit = { _, _ -> },
+    /** Temporarily defer presentation while the host is editing a check-in, without consuming it. */
+    val canPresent: (Context, NudgeRequest) -> Boolean = { _, _ -> true },
 )

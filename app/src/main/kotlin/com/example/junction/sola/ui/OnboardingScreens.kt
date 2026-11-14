@@ -129,7 +129,9 @@ fun OnboardingScreen(
                     SolaField(
                         "Your name",
                         state.profile.name,
-                        { name -> store.update { it.copy(profile = it.profile.copy(name = name)) } },
+                        { name ->
+                            store.update { it.copy(profile = it.profile.copy(name = name)) }
+                        },
                     )
                     SolaField(
                         "Email (optional)",
@@ -295,10 +297,11 @@ fun OnboardingScreen(
                 Spacer(Modifier.height(28.dp))
                 RhythmControls(state.preferences) { p -> store.update { it.copy(preferences = p) } }
                 Body(
-                    "Your rhythm is saved. Phone reminders will be connected in the next widget integration step.",
+                    "Choose your rhythm, then enable your little visitor below.",
                     Modifier.padding(vertical = 20.dp),
                     true,
                 )
+                ReminderControls(!state.demo && !store.isPreview)
                 PrimaryButton("Continue", next, Modifier.fillMaxWidth())
             }
             SolaScreen.FRIEND -> {
@@ -362,6 +365,9 @@ fun OnboardingScreen(
 fun RhythmControls(p: SolaPreferences, update: (SolaPreferences) -> Unit) {
     val context = LocalContext.current
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Body(
+            "More than one check-in repeats hourly from its selected time, within the same day. Overlapping times share one visit."
+        )
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             listOf("Every day", "Weekdays", "Every 2 days").forEach { label ->
                 ChoiceChip(
@@ -375,11 +381,18 @@ fun RhythmControls(p: SolaPreferences, update: (SolaPreferences) -> Unit) {
         listOf("Morning" to p.morning, "Afternoon" to p.afternoon, "Evening" to p.evening)
             .forEach { (label, window) ->
                 fun changed(w: CheckInWindow) {
+                    val bounded =
+                        w.copy(
+                            count =
+                                w.count.coerceAtMost(
+                                    (24 - w.time.substringBefore(':').toInt()).coerceAtMost(3)
+                                )
+                        )
                     update(
                         when (label) {
-                            "Morning" -> p.copy(morning = w)
-                            "Afternoon" -> p.copy(afternoon = w)
-                            else -> p.copy(evening = w)
+                            "Morning" -> p.copy(morning = bounded)
+                            "Afternoon" -> p.copy(afternoon = bounded)
+                            else -> p.copy(evening = bounded)
                         }
                     )
                 }

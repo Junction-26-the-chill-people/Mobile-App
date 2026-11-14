@@ -121,6 +121,14 @@ object CatNudge {
 
     fun pendingRequests(context: Context): List<NudgeRequest> = NudgeStore.entries(context).map { it.request }
 
+    /** Cancel one visit when its host task was handled through another entry point. */
+    fun dismiss(context: Context, id: String): Boolean {
+        val removed = NudgeStore.remove(context, id) ?: return false
+        refresh(context)
+        reportOutcome(context, removed, NudgeOutcome.DISMISSED)
+        return true
+    }
+
     internal fun startHost(context: Context): Boolean = try {
         val service = Intent(context, CatNudgeService::class.java)
         if (Build.VERSION.SDK_INT >= 26) context.startForegroundService(service) else context.startService(service)

@@ -1,4 +1,4 @@
-﻿# Junction · Sola for Android
+# Junction · Sola for Android
 
 Native Kotlin / Jetpack Compose port of the supplied Sola AI Studio frontend. Includes seven onboarding pages, Today and activity ideas, both mood check-ins, a growing memory garden, photo/text/voice diary, statistics, a six-part monthly recap, Support and Settings. Profiles, entries, goals, people and drafts persist on the phone. **Sample garden** uses separate storage.
 
@@ -28,10 +28,21 @@ Alternatively run `scripts/start-telegram.ps1`. In **Settings → Telegram conne
 
 ## Still reserved
 
-Gemini summaries/reflections, account sign-in, clinician sharing, device/music data and scheduled reminders are visible placeholders or saved preferences. No simulated calls, fake recordings, generated clinical insights or pretend Telegram delivery. The Support call button opens the dialer for an owner-configured phone number.
+Gemini summaries/reflections, account sign-in, clinician sharing, and device/music data are visible placeholders or saved preferences. No simulated calls, fake recordings, generated clinical insights or pretend Telegram delivery. The Support call button opens the dialer for an owner-configured phone number.
 
-The existing **`:catnudge`** widget is preserved. Its manual ADB trigger still works; automatic visits are paused by `FrontendFeatures.CAT_DAILY_INTEGRATION = false`. Connecting the native questionnaire and reminder preferences is the **next integration step**. The widget’s contract remains morning/evening daily quizzes at 10:00/21:00, after 15 continuous unlocked seconds, with the invitation preserved through screen-off. See [NUDGE.md](NUDGE.md) and [AGENTS.md](AGENTS.md).
+## Daily cat check-ins
 
+In onboarding’s timing page or **Settings → Check-in preferences**, pick times/cadence and enable **Cat check-in visits**. Allow display over other apps when prompted. New profiles start at 10:00 and 21:00 local time; existing saved choices are preserved. Morning, afternoon and evening can each be off or repeat up to three times, hourly from the selected time within that day. Overlapping times share one visit. Weekdays and every-two-days are supported.
+
+The cat waits for 15 continuous unlocked seconds. Screen-off hides her while preserving the invitation and message stage. Yes opens **How are you?** in your own journal; **Rest here** saves the mood and takes you to the garden. Accepting alone is not a completed log. Logging directly in the app also satisfies the current due visit. Unfinished accepted sessions survive relaunch, and completed session IDs prevent duplicate logging. Visit timing edits apply to future slots; already-pending visits stay intact. The native check-in screen temporarily defers other overlays while you are answering. Stop/disable remains available in Settings and the service notification. Android may delay inexact alarms; this never wakes a sleeping phone.
+
+```sh
+adb shell am start -n com.example.junction/.nudge.NudgeTriggerActivity
+# Exercise the real readiness gate:
+adb shell am start -n com.example.junction/.nudge.NudgeTriggerActivity --ez wait_ready true
+```
+
+The reusable animation remains in **`:catnudge`**; host scheduling and mood records remain in **`:app`**. See [NUDGE.md](NUDGE.md) and [AGENTS.md](AGENTS.md).
 ## Checks and screen previews
 
 ```sh
