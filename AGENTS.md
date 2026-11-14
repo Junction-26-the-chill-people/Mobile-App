@@ -1,3 +1,34 @@
+# Native Sola frontend — current work
+
+The launcher is now the native Kotlin/Compose Sola frontend. **Do not connect the cat to these screens yet**: the user requested the frontend port first and widget integration afterward. `FrontendFeatures.CAT_DAILY_INTEGRATION` is false; startup disables old daily monitoring, receivers skip scheduling, and explicit ADB widget previews retain their reserved route.
+
+## Feature map
+
+- `app/.../sola/SolaApp.kt`: feature root, saved navigation, bottom tabs, native photo/speech launchers, Telegram confirmations and foreground polling.
+- `sola/data/SolaModels.kt`: screens, feature models, mood choices, idea pools, local-date helpers and explicit sample data.
+- `sola/data/SolaStore.kt`: versioned private local JSON, durable drafts and separate personal/sample records. New fields need encode/decode defaults and a round-trip test. Debug previews must remain ephemeral.
+- `sola/data/SolaMedia.kt`: imports only a selected photo into private files, normalizes orientation and removes EXIF. Never persist a temporary picker URI as the only copy.
+- `sola/data/TelegramGateway.kt`: supplied Telegram server contract; confirmed delivery only, credentials never in Android code. HTTPS in release, localhost HTTP in debug only.
+- `sola/ui/SolaComponents.kt`: typography, ambient backgrounds, frosted cards, icons and shared controls. Keep real system insets; do not copy the source’s desktop workbench or fake phone frame.
+- `sola/ui/OnboardingScreens.kt`: welcome, local profile, interests, intentions, future source preferences, rhythm and trusted friend.
+- `sola/ui/DailyScreens.kt`: Today, ideas, mood meter/scale, diary and garden interactions.
+- `sola/ui/GardenArtwork.kt` + `assets/sola/branches.json`: original progressive tree geometry rendered on Canvas; one memory node per local day, selectable day memories and flowers. Keep drawing and feature state separate.
+- `sola/ui/InsightsScreens.kt`: descriptive statistics, support/dialer and six recap stories. `SettingsScreen.kt`: owner preferences, people and connection setup.
+- `telegram-bridge/bridge.mjs`: localhost single-owner Node bridge. `.env` and `.data/` are ignored. Its tests inject a fake Telegram transport and must never send real messages.
+
+## Extend the frontend
+
+Add a route to `SolaScreen` and the root `when` in `SolaApp`. Keep page content in a screen composable and data in `SolaStore` models; pass actions rather than reaching into the cat library or hardcoding Activity navigation in artwork. Preserve full diary text and several check-ins per day while growing only one daily branch. Mark sample data and keep it isolated from the personal journal. Calls must open `ACTION_DIAL`; speech must use actual recognition or report unavailability. Do not claim a watch, clinic, account, Gemini service or Telegram delivery is connected when it is not.
+
+Gemini text summaries/reflections, account authentication, clinician sharing, device/music APIs and reminder delivery are deliberately reserved. Rhythm controls currently save preferences only. No shared database has been integrated. Before adding one, follow the parent `E:\Junction26\AGENTS.md` and read/check the current DB-Data schema contract.
+
+For the later widget integration, register the real questionnaire route in the host destination map and pass `nudge_id`, period/date/scheduled-at into it; questionnaire completion remains separate from accepting the overlay. Reconcile the frontend’s saved rhythm with the widget’s existing 10:00/21:00 policy explicitly, then opt the owner into monitoring from a visible Activity. Preserve all widget lifecycle/tap-stage rules below.
+
+## Verify
+
+Run the root README checks. `SolaStoreTest` covers persistence, sample isolation, daily grouping, drafts and release URL rules. `SolaUiTest` exercises real flows and renders every native screen to `app/build/sola-preview/`. `MainScreenTest` tests the actual Activity on a phone using debug-only ephemeral preview extras; it must not clear or edit a real journal. Set `preview_motion=false` for deterministic tests; custom artwork still animates with Android animator scale zero. Check small screens, scrollable forms, large fonts, keyboard/insets, lock/relaunch and photos before changing layouts. Keep the existing cat module and its tests passing.
+
+---
 # Android integration guide
 
 ## Product contract
@@ -30,7 +61,7 @@ This module must not import `com.example.junction`, reference `MainActivity`, kn
 - `dailyquiz/DailyQuizScheduler.kt`: alarm scheduling, due-slot reconciliation, stable per-date/period IDs, host copy rotation and deduplication.
 - `dailyquiz/DailyQuizReceiver.kt`: boot/package/time-zone/time-change/alarm entry points.
 - `nudge/NudgeController.kt`, `nudge/NudgeTriggerActivity.kt`: local ADB/deep-link preview and permission bridge. Keep the existing ADB component compatible.
-- `MainActivity.kt`, `ui/nudge/DailyQuizControls.kt`: owner setup, daily opt-in, time editing and optional Usage Access.
+- `MainActivity.kt`: native Sola launcher and legacy reserved ADB route. `ui/nudge/` controls are retained for the later widget integration.
 - `ui/nudge/NudgeHomeScreen.kt`: host home and reserved quiz screen. Replace the reserved content with the real questionnaire.
 
 ## Add a destination or questionnaire

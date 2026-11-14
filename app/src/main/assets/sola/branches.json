@@ -1,0 +1,370 @@
+[
+    {
+        "path":  "M 195 198 Q 174 174 150 144",
+        "strokeWidth":  3.4,
+        "twigs":  [
+                      {
+                          "d":  "M 166 164 Q 148 156 134 142",
+                          "tipX":  134,
+                          "tipY":  142,
+                          "angle":  -42,
+                          "petalColor":  "#EFC0AC"
+                      },
+                      {
+                          "d":  "M 157 152 Q 163 136 169 124",
+                          "tipX":  169,
+                          "tipY":  124,
+                          "angle":  18,
+                          "petalColor":  "#CBBDE5"
+                      }
+                  ],
+        "tipX":  150,
+        "tipY":  144,
+        "size":  22
+    },
+    {
+        "path":  "M 195 198 Q 218 172 242 142",
+        "strokeWidth":  3.3,
+        "twigs":  [
+                      {
+                          "d":  "M 226 162 Q 246 154 259 138",
+                          "tipX":  259,
+                          "tipY":  138,
+                          "angle":  38,
+                          "petalColor":  "#F3D29C"
+                      },
+                      {
+                          "d":  "M 234 151 Q 228 134 222 122",
+                          "tipX":  222,
+                          "tipY":  122,
+                          "angle":  -18,
+                          "petalColor":  "#B8D4E8"
+                      }
+                  ],
+        "tipX":  242,
+        "tipY":  142,
+        "size":  22
+    },
+    {
+        "path":  "M 168 166 Q 134 158 104 138",
+        "strokeWidth":  2.6,
+        "twigs":  [
+                      {
+                          "d":  "M 128 152 Q 112 163 96 164",
+                          "tipX":  96,
+                          "tipY":  164,
+                          "angle":  -72,
+                          "petalColor":  "#F2BAC6"
+                      },
+                      {
+                          "d":  "M 118 146 Q 108 132 102 120",
+                          "tipX":  102,
+                          "tipY":  120,
+                          "angle":  -28,
+                          "petalColor":  "#B8D7C0"
+                      }
+                  ],
+        "tipX":  104,
+        "tipY":  138,
+        "size":  22
+    },
+    {
+        "path":  "M 224 164 Q 260 156 290 136",
+        "strokeWidth":  2.6,
+        "twigs":  [
+                      {
+                          "d":  "M 266 150 Q 282 162 298 162",
+                          "tipX":  298,
+                          "tipY":  162,
+                          "angle":  74,
+                          "petalColor":  "#CBBDE5"
+                      },
+                      {
+                          "d":  "M 276 144 Q 286 130 294 118",
+                          "tipX":  294,
+                          "tipY":  118,
+                          "angle":  30,
+                          "petalColor":  "#F3C2AE"
+                      }
+                  ],
+        "tipX":  290,
+        "tipY":  136,
+        "size":  22
+    },
+    {
+        "path":  "M 150 144 Q 158 114 172 88",
+        "strokeWidth":  2.3,
+        "twigs":  [
+                      {
+                          "d":  "M 159 116 Q 144 104 138 90",
+                          "tipX":  138,
+                          "tipY":  90,
+                          "angle":  -34,
+                          "petalColor":  "#F3D29C"
+                      },
+                      {
+                          "d":  "M 166 101 Q 179 94 188 82",
+                          "tipX":  188,
+                          "tipY":  82,
+                          "angle":  35,
+                          "petalColor":  "#F2BAC6"
+                      }
+                  ],
+        "tipX":  172,
+        "tipY":  88,
+        "size":  24
+    },
+    {
+        "path":  "M 242 142 Q 234 112 220 86",
+        "strokeWidth":  2.3,
+        "twigs":  [
+                      {
+                          "d":  "M 233 114 Q 248 102 256 88",
+                          "tipX":  256,
+                          "tipY":  88,
+                          "angle":  34,
+                          "petalColor":  "#B8D7C0"
+                      },
+                      {
+                          "d":  "M 226 99 Q 214 91 205 79",
+                          "tipX":  205,
+                          "tipY":  79,
+                          "angle":  -34,
+                          "petalColor":  "#CBBDE5"
+                      }
+                  ],
+        "tipX":  220,
+        "tipY":  86,
+        "size":  24
+    },
+    {
+        "path":  "M 150 144 Q 126 126 112 102",
+        "strokeWidth":  2.1,
+        "twigs":  [
+                      {
+                          "d":  "M 130 124 Q 114 120 100 112",
+                          "tipX":  100,
+                          "tipY":  112,
+                          "angle":  -56,
+                          "petalColor":  "#B8D4E8"
+                      },
+                      {
+                          "d":  "M 119 112 Q 117 96 123 84",
+                          "tipX":  123,
+                          "tipY":  84,
+                          "angle":  12,
+                          "petalColor":  "#F3C2AE"
+                      }
+                  ],
+        "tipX":  112,
+        "tipY":  102,
+        "size":  22
+    },
+    {
+        "path":  "M 242 142 Q 268 124 282 100",
+        "strokeWidth":  2.1,
+        "twigs":  [
+                      {
+                          "d":  "M 264 122 Q 280 118 294 110",
+                          "tipX":  294,
+                          "tipY":  110,
+                          "angle":  56,
+                          "petalColor":  "#F2BAC6"
+                      },
+                      {
+                          "d":  "M 275 110 Q 277 94 271 82",
+                          "tipX":  271,
+                          "tipY":  82,
+                          "angle":  -12,
+                          "petalColor":  "#F3D29C"
+                      }
+                  ],
+        "tipX":  282,
+        "tipY":  100,
+        "size":  22
+    },
+    {
+        "path":  "M 104 138 Q 84 124 72 104",
+        "strokeWidth":  1.75,
+        "twigs":  [
+                      {
+                          "d":  "M 88 125 Q 74 130 62 126",
+                          "tipX":  62,
+                          "tipY":  126,
+                          "angle":  -78,
+                          "petalColor":  "#B8D7C0"
+                      },
+                      {
+                          "d":  "M 78 114 Q 72 99 77 87",
+                          "tipX":  77,
+                          "tipY":  87,
+                          "angle":  -8,
+                          "petalColor":  "#CBBDE5"
+                      }
+                  ],
+        "tipX":  72,
+        "tipY":  104,
+        "size":  21
+    },
+    {
+        "path":  "M 290 136 Q 310 122 322 102",
+        "strokeWidth":  1.75,
+        "twigs":  [
+                      {
+                          "d":  "M 306 123 Q 320 128 332 124",
+                          "tipX":  332,
+                          "tipY":  124,
+                          "angle":  78,
+                          "petalColor":  "#B8D4E8"
+                      },
+                      {
+                          "d":  "M 316 112 Q 322 97 317 85",
+                          "tipX":  317,
+                          "tipY":  85,
+                          "angle":  10,
+                          "petalColor":  "#F3C2AE"
+                      }
+                  ],
+        "tipX":  322,
+        "tipY":  102,
+        "size":  21
+    },
+    {
+        "path":  "M 172 88 Q 160 66 150 48",
+        "strokeWidth":  1.65,
+        "twigs":  [
+                      {
+                          "d":  "M 162 68 Q 147 64 136 56",
+                          "tipX":  136,
+                          "tipY":  56,
+                          "angle":  -48,
+                          "petalColor":  "#F2BAC6"
+                      },
+                      {
+                          "d":  "M 156 58 Q 165 44 174 38",
+                          "tipX":  174,
+                          "tipY":  38,
+                          "angle":  28,
+                          "petalColor":  "#F3D29C"
+                      }
+                  ],
+        "tipX":  150,
+        "tipY":  48,
+        "size":  22
+    },
+    {
+        "path":  "M 220 86 Q 232 64 242 46",
+        "strokeWidth":  1.65,
+        "twigs":  [
+                      {
+                          "d":  "M 230 66 Q 245 62 256 54",
+                          "tipX":  256,
+                          "tipY":  54,
+                          "angle":  48,
+                          "petalColor":  "#CBBDE5"
+                      },
+                      {
+                          "d":  "M 236 56 Q 227 42 218 36",
+                          "tipX":  218,
+                          "tipY":  36,
+                          "angle":  -28,
+                          "petalColor":  "#B8D7C0"
+                      }
+                  ],
+        "tipX":  242,
+        "tipY":  46,
+        "size":  22
+    },
+    {
+        "path":  "M 172 88 Q 190 64 196 42",
+        "strokeWidth":  1.6,
+        "twigs":  [
+                      {
+                          "d":  "M 188 62 Q 180 48 184 34",
+                          "tipX":  184,
+                          "tipY":  34,
+                          "angle":  -10,
+                          "petalColor":  "#B8D4E8"
+                      },
+                      {
+                          "d":  "M 192 52 Q 204 44 212 38",
+                          "tipX":  212,
+                          "tipY":  38,
+                          "angle":  34,
+                          "petalColor":  "#F3C2AE"
+                      }
+                  ],
+        "tipX":  196,
+        "tipY":  42,
+        "size":  23
+    },
+    {
+        "path":  "M 112 102 Q 104 80 110 62",
+        "strokeWidth":  1.55,
+        "twigs":  [
+                      {
+                          "d":  "M 106 82 Q 92 78 84 68",
+                          "tipX":  84,
+                          "tipY":  68,
+                          "angle":  -44,
+                          "petalColor":  "#F3D29C"
+                      },
+                      {
+                          "d":  "M 108 70 Q 118 60 128 52",
+                          "tipX":  128,
+                          "tipY":  52,
+                          "angle":  32,
+                          "petalColor":  "#F2BAC6"
+                      }
+                  ],
+        "tipX":  110,
+        "tipY":  62,
+        "size":  21
+    },
+    {
+        "path":  "M 282 100 Q 290 78 284 60",
+        "strokeWidth":  1.55,
+        "twigs":  [
+                      {
+                          "d":  "M 288 80 Q 302 76 310 66",
+                          "tipX":  310,
+                          "tipY":  66,
+                          "angle":  44,
+                          "petalColor":  "#B8D7C0"
+                      },
+                      {
+                          "d":  "M 286 68 Q 276 58 266 50",
+                          "tipX":  266,
+                          "tipY":  50,
+                          "angle":  -32,
+                          "petalColor":  "#CBBDE5"
+                      }
+                  ],
+        "tipX":  284,
+        "tipY":  60,
+        "size":  21
+    },
+    {
+        "path":  "M 195 198 Q 196 154 195 118",
+        "strokeWidth":  1.7,
+        "twigs":  [
+                      {
+                          "d":  "M 196 152 Q 182 138 176 124",
+                          "tipX":  176,
+                          "tipY":  124,
+                          "angle":  -24,
+                          "petalColor":  "#F3C2AE"
+                      },
+                      {
+                          "d":  "M 196 140 Q 209 128 216 116",
+                          "tipX":  216,
+                          "tipY":  116,
+                          "angle":  26,
+                          "petalColor":  "#B8D4E8"
+                      }
+                  ],
+        "tipX":  195,
+        "tipY":  118,
+        "size":  22
+    }
+]

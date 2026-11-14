@@ -24,8 +24,13 @@ class JunctionApplication : Application() {
                 },
                 "home" to { context, _ -> Intent(context, MainActivity::class.java).setAction(Intent.ACTION_MAIN) },
             ),
-            onMonitorCheck = { DailyQuizScheduler.reconcile(it) },
-            onMonitoringChanged = { context, enabled -> DailyQuizScheduler.onMonitoringChanged(context, enabled) },
+            onMonitorCheck = { if (FrontendFeatures.CAT_DAILY_INTEGRATION) DailyQuizScheduler.reconcile(it) },
+            onMonitoringChanged = { context, enabled ->
+                if (FrontendFeatures.CAT_DAILY_INTEGRATION) DailyQuizScheduler.onMonitoringChanged(context, enabled)
+                else if (enabled) CatNudge.stopMonitoring(context)
+                else DailyQuizScheduler.onMonitoringChanged(context, false)
+            },
         ))
+        if (!FrontendFeatures.CAT_DAILY_INTEGRATION) CatNudge.stopMonitoring(this)
     }
 }
