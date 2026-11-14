@@ -133,7 +133,7 @@ class SolaUiTest {
     }
 
     @Test
-    fun allFifteenNativeScreensRenderAndProduceReviewablePreviews() {
+    fun allNativeScreensRenderAndProduceReviewablePreviews() {
         val initial = mutableStateOf(SolaScreen.WELCOME)
         val store = store(SolaContent.demo())
         lateinit var view: View

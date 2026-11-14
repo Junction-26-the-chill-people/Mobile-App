@@ -53,6 +53,22 @@ class MainScreenTest {
     }
 
     @Test
+    fun settingsShowsTheBasicRecordAndSelectedDemoWebsiteNotice() {
+        launch("settings")
+        compose.onNodeWithText("Your record").performScrollTo().performClick()
+        compose.onNodeWithText("My record · choose a view").performClick()
+        compose.onNodeWithText("Noah").performScrollTo().performClick()
+        compose.onNodeWithText("Noah’s record").assertExists()
+        compose.onNodeWithText("Fictional sample data · read only").assertExists()
+        compose.onNodeWithText("More on the website").performScrollTo().performClick()
+        compose.onNodeWithText("Noah · demo profile", ignoreCase = true).assertExists()
+        compose.onNodeWithText("The website is not available on phones yet.").assertExists()
+        compose.onNodeWithText("Back to these logs").performScrollTo().performClick()
+        compose.onNodeWithContentDescription("Back").performScrollTo().performClick()
+        compose.onNodeWithText("Make yourself at home.").assertExists()
+    }
+
+    @Test
     fun catDestinationOpensTheNativeCheckInAndSavesToTheGarden() {
         scenario =
             ActivityScenario.launch(

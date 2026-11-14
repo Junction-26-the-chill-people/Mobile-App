@@ -71,7 +71,15 @@ fun SolaApp(
     }
     fun navigate(to: SolaScreen) {
         if (to == screen) return
-        if (to in listOf(SolaScreen.SETTINGS, SolaScreen.CHECK_IN, SolaScreen.RECAP))
+        if (
+            to in
+                listOf(
+                    SolaScreen.SETTINGS,
+                    SolaScreen.CHECK_IN,
+                    SolaScreen.RECAP,
+                    SolaScreen.BASIC_LOGS,
+                )
+        )
             history = history + screenName
         else history = emptyList()
         screenName = to.name
@@ -309,6 +317,11 @@ fun SolaApp(
                                 ::openBot,
                             )
                         SolaScreen.RECAP -> RecapScreen(s, store, ::back)
+                        SolaScreen.BASIC_LOGS ->
+                            BasicRecordScreen(
+                                if (store.isPreview || !s.demo) s else SolaStore.personal(context),
+                                ::back,
+                            )
                     }
                 }
                 if (

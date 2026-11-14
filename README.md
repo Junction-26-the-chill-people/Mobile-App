@@ -30,6 +30,20 @@ Alternatively run `scripts/start-telegram.ps1`. In **Settings → Telegram conne
 
 Gemini summaries/reflections, account sign-in, clinician sharing, and device/music data are visible placeholders or saved preferences. No simulated calls, fake recordings, generated clinical insights or pretend Telegram delivery. The Support call button opens the dialer for an owner-configured phone number.
 
+## A small personal record
+
+At the bottom of **Settings → Your record**, see basic feeling counts and dated check-ins, with 7-day, 28-day and all-time views. This stays out of the main navigation. The 4×4 picker has sixteen distinct expressions matched to its labels.
+
+The view selector also offers eleven clearly marked, read-only fictional profiles from the simulation website. Only mood (the original **1–5** scale), sleep and steps are bundled; original dates and gaps stay intact. Examples never enter your journal. **More on the website** opens an unavailable-on-phone notice for the selected profile; no website or journal sync is connected yet.
+
+To refresh those small fixtures from the separate Data-Collection checkout:
+
+```sh
+node scripts/export-basic-log-samples.mjs /path/to/relapse-demo/data/demo-data.json
+```
+
+The exporter accepts only explicitly synthetic `sim-*` stories, records the source release/checksum and excludes research participants, locations and analysis outputs.
+
 ## Daily cat check-ins
 
 In onboarding’s timing page or **Settings → Check-in preferences**, pick times/cadence and enable **Cat check-in visits**. Allow display over other apps when prompted. New profiles start at 10:00 and 21:00 local time; existing saved choices are preserved. Morning, afternoon and evening can each be off or repeat up to three times, hourly from the selected time within that day. Overlapping times share one visit. Weekdays and every-two-days are supported.
@@ -56,4 +70,4 @@ Native previews render into `app/build/sola-preview/`; widget previews remain in
 adb shell am start -n com.example.junction/.MainActivity --es preview_screen garden --ez preview_demo true
 ```
 
-All 15 routes are listed in `SolaScreen`. These extras are ignored in release builds. Keep `.env`, local bridge data, APKs, photos and build output out of Git.
+All 16 routes are listed in `SolaScreen`. These extras are ignored in release builds. Keep `.env`, local bridge data, APKs, photos and build output out of Git.

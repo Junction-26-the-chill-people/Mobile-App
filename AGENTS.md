@@ -15,6 +15,9 @@ The native Kotlin/Compose frontend is connected to the cat widget. `daily_quiz` 
 - `sola/ui/DailyScreens.kt`: Today, ideas, mood meter/scale, diary and garden interactions.
 - `sola/ui/GardenArtwork.kt` + `assets/sola/branches.json`: original progressive tree geometry rendered on Canvas; one memory node per local day, selectable day memories and flowers. Keep drawing and feature state separate.
 - `sola/ui/InsightsScreens.kt`: descriptive statistics, support/dialer and six recap stories. `SettingsScreen.kt`: owner preferences, people and connection setup.
+- `sola/ui/MoodFaces.kt`: sixteen label-specific Canvas expressions shared by the picker and records. Keep the faces distinct by shape, not just colour.
+- `sola/ui/BasicRecordScreen.kt` + `sola/data/BasicRecords.kt`: quiet **Settings → Your record** detail. Personal feeling counts and dated logs only; no main-tab promotion. Its selector offers eleven explicitly fictional, read-only website examples, separate from personal/sample garden storage. Preserve the source mood scale (1–5), dates, missing values and synthetic labels. Do not infer mood names from numeric website scores. The selected-profile website button currently opens an unavailable notice; never navigate to `<notavailable>` or imply journal sync.
+- `scripts/export-basic-log-samples.mjs` → `assets/sola/basic-log-samples.json`: reproducible small projection of Data-Collection's synthetic `sim-*` stories. Keep only date/mood/sleep/steps/missing; never copy the source bundle wholesale, research users, locations, PHQ, risk scores or analysis engines. Source release and SHA-256 are recorded. `BasicRecordsTest` guards the fixture boundary; `BasicRecordUiTest` checks readonly switching, navigation and large text.
 - `telegram-bridge/bridge.mjs`: localhost single-owner Node bridge. `.env` and `.data/` are ignored. Its tests inject a fake Telegram transport and must never send real messages.
 
 ## Extend the frontend

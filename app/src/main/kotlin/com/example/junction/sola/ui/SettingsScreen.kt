@@ -502,6 +502,14 @@ fun SettingsScreen(
                 panel = "reset"
             }
         }
+        TextButton(
+            { navigate(SolaScreen.BASIC_LOGS) },
+            Modifier.fillMaxWidth().padding(top = 6.dp),
+        ) {
+            SolaIcon("stats", Modifier.size(14.dp), Muted.copy(.65f))
+            Spacer(Modifier.width(8.dp))
+            Text("Your record", fontSize = 12.sp, color = Muted)
+        }
         Body(
             "Sola · a little room to grow",
             Modifier.fillMaxWidth().padding(vertical = 28.dp),

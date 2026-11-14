@@ -21,7 +21,8 @@ enum class SolaScreen {
     STATISTICS,
     SUPPORT,
     RECAP,
-    SETTINGS;
+    SETTINGS,
+    BASIC_LOGS;
 
     companion object {
         fun fromPreview(value: String?): SolaScreen? = entries.firstOrNull {
