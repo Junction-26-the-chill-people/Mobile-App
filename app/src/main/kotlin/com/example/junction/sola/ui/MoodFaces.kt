@@ -3,7 +3,6 @@ package com.example.junction.sola.ui
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
@@ -15,24 +14,24 @@ fun MoodFace(mood: SolaMood, modifier: Modifier = Modifier) {
     Canvas(modifier) { drawMoodFace(mood) }
 }
 
-/** Sixteen label-specific expressions; their shapes remain distinct even without their colours. */
+/** Small pearly characters, each with its own expression, even without colour. */
 internal fun DrawScope.drawMoodFace(mood: SolaMood) {
     val tint = Color(mood.color)
     val radius = size.minDimension / 2
     drawCircle(
         Brush.radialGradient(
-            listOf(Color.White.copy(.65f), tint),
-            center - Offset(radius * .3f, radius * .35f),
-            radius * 1.8f,
+            listOf(lerp(tint, Color.White, .76f), lerp(tint, Color.White, .12f), tint),
+            center - Offset(radius * .34f, radius * .42f),
+            radius * 1.85f,
         ),
         radius,
     )
-    drawCircle(Color.White.copy(.7f), radius - 1, style = Stroke(1f))
+    drawCircle(Color.White.copy(.72f), radius - .7f, style = Stroke(1.1f))
     scale(size.width / 64f, size.height / 64f, Offset.Zero) {
-        val ink = Color(0xFF5B584C).copy(.85f)
-        val pen = Stroke(1.35f, cap = StrokeCap.Round, join = StrokeJoin.Round)
-        fun line(x: Float, y: Float, x2: Float, y2: Float, color: Color = ink) =
-            drawLine(color, Offset(x, y), Offset(x2, y2), 1.35f, StrokeCap.Round)
+        val ink = Color(0xFF6B584F)
+        val blush = Color(0xFFE9A39F)
+        val rose = Color(0xFFDFA29B)
+
         fun curve(
             x: Float,
             y: Float,
@@ -41,190 +40,226 @@ internal fun DrawScope.drawMoodFace(mood: SolaMood) {
             x2: Float,
             y2: Float,
             color: Color = ink,
+            width: Float = 1.65f,
         ) {
-            val path =
+            drawPath(
                 Path().apply {
                     moveTo(x, y)
                     quadraticTo(cx, cy, x2, y2)
-                }
-            drawPath(path, color, style = pen)
+                },
+                color,
+                style = Stroke(width, cap = StrokeCap.Round, join = StrokeJoin.Round),
+            )
         }
-        fun dots(y: Float = 28f, lookX: Float = 0f, lookY: Float = 0f, r: Float = 1.45f) {
-            listOf(25f, 39f).forEach { x -> drawCircle(ink, r, Offset(x + lookX, y + lookY)) }
+        fun eye(
+            x: Float,
+            y: Float = 31.5f,
+            w: Float = 4.6f,
+            h: Float = 5.4f,
+            shine: Boolean = true,
+        ) {
+            drawOval(ink, Offset(x - w / 2, y - h / 2), Size(w, h))
+            if (shine) drawCircle(Color.White.copy(.92f), .72f, Offset(x - w * .16f, y - h * .21f))
         }
-        fun smile(width: Float = 12f, depth: Float = 7f, y: Float = 38f) =
-            curve(32 - width / 2, y, 32f, y + depth, 32 + width / 2, y)
-        fun frown() = curve(26f, 42f, 32f, 35f, 38f, 42f)
-        fun heart(x: Float, y: Float) {
+        fun eyes(y: Float = 31.5f, w: Float = 4.6f, h: Float = 5.4f) {
+            eye(24.5f, y, w, h)
+            eye(39.5f, y, w, h)
+        }
+        fun cheek(x: Float, strength: Float = 1f) {
+            drawOval(
+                Brush.radialGradient(
+                    listOf(blush.copy(.44f * strength), blush.copy(0f)),
+                    Offset(x, 38f),
+                    4.8f,
+                ),
+                Offset(x - 5f, 34.8f),
+                Size(10f, 6.4f),
+            )
+        }
+        fun smile(width: Float = 7f, depth: Float = 4f, y: Float = 40f) =
+            curve(32f - width / 2, y, 32f, y + depth, 32f + width / 2, y)
+        fun tinyW() {
+            curve(27.5f, 40f, 29.5f, 44.2f, 32f, 40.8f)
+            curve(32f, 40.8f, 34.5f, 44.2f, 36.5f, 40f)
+        }
+        fun drop(x: Float, y: Float, small: Boolean = false) {
+            val width = if (small) 2.1f else 2.7f
             val p =
                 Path().apply {
-                    moveTo(x, y + 4)
-                    cubicTo(x - 9, y - 1, x - 4, y - 7, x, y - 3)
-                    cubicTo(x + 4, y - 7, x + 9, y - 1, x, y + 4)
+                    moveTo(x, y - 3.2f)
+                    cubicTo(x - width * 1.7f, y + 1.8f, x - width, y + 4f, x, y + 4f)
+                    cubicTo(x + width, y + 4f, x + width * 1.7f, y + 1.8f, x, y - 3.2f)
+                }
+            drawPath(p, Color(0xFF96BDD4).copy(.8f))
+            curve(
+                x - .8f,
+                y + .3f,
+                x - 1.4f,
+                y + 1.4f,
+                x - .7f,
+                y + 2.2f,
+                Color.White.copy(.7f),
+                .85f,
+            )
+        }
+        fun openSmile() {
+            val p =
+                Path().apply {
+                    moveTo(26.5f, 38.8f)
+                    quadraticTo(32f, 40.3f, 37.5f, 38.8f)
+                    cubicTo(36.8f, 49f, 27.2f, 49f, 26.5f, 38.8f)
+                    close()
                 }
             drawPath(p, ink)
+            drawOval(rose, Offset(29.1f, 43f), Size(5.8f, 2.6f))
         }
-        fun drop(x: Float, y: Float, color: Color) {
+        fun heart(x: Float) {
             val p =
                 Path().apply {
-                    moveTo(x, y - 3)
-                    cubicTo(x - 5, y + 2, x - 3, y + 5, x, y + 5)
-                    cubicTo(x + 3, y + 5, x + 5, y + 2, x, y - 3)
+                    moveTo(x, 35f)
+                    cubicTo(x - 8f, 30f, x - 4.5f, 25.3f, x, 29f)
+                    cubicTo(x + 4.5f, 25.3f, x + 8f, 30f, x, 35f)
+                    close()
                 }
-            drawPath(p, color)
+            drawPath(p, Color(0xFFB97878))
+            drawOval(Color.White.copy(.55f), Offset(x - 3f, 28.8f), Size(1.7f, 1.1f))
         }
+        fun sparkle(x: Float, y: Float) {
+            val p =
+                Path().apply {
+                    moveTo(x, y - 2.7f)
+                    quadraticTo(x + .35f, y - .35f, x + 2.3f, y)
+                    quadraticTo(x + .35f, y + .35f, x, y + 2.7f)
+                    quadraticTo(x - .35f, y + .35f, x - 2.3f, y)
+                    quadraticTo(x - .35f, y - .35f, x, y - 2.7f)
+                    close()
+                }
+            drawPath(p, ink.copy(.52f))
+        }
+
+        // Soft cheeks and warm ink hold the set together. Expressions carry the meaning.
+        val cheekStrength = if (mood.id in listOf("drained", "low")) .6f else 1f
+        cheek(17.5f, cheekStrength)
+        cheek(46.5f, cheekStrength)
         when (mood.id) {
             "frustrated" -> {
-                dots(29f)
-                line(20f, 22f, 28f, 25f)
-                line(36f, 25f, 44f, 22f)
-                val p =
-                    Path().apply {
-                        moveTo(25f, 41f)
-                        lineTo(29f, 39.5f)
-                        lineTo(32f, 41f)
-                        lineTo(35f, 39.5f)
-                        lineTo(39f, 41f)
-                    }
-                drawPath(p, ink, style = pen)
+                eyes(32f, 4.2f, 4.6f)
+                curve(21f, 26f, 24.5f, 26.5f, 27.5f, 28f, width = 1.4f)
+                curve(36.5f, 28f, 39.5f, 26.5f, 43f, 26f, width = 1.4f)
+                curve(29f, 42f, 32f, 38.7f, 35f, 42f)
+                curve(30.5f, 43.4f, 32f, 44f, 33.5f, 43.4f, rose.copy(.7f), 1f)
             }
             "anxious" -> {
-                dots(29f, r = 1.25f)
-                curve(20f, 25f, 24f, 20f, 29f, 23f)
-                curve(35f, 23f, 40f, 20f, 44f, 25f)
-                curve(27f, 41f, 30f, 37.5f, 32f, 40f)
-                curve(32f, 40f, 35f, 43f, 38f, 39f)
-                drop(49f, 25f, Color(0xFF8DAFC7).copy(.8f))
+                eyes(32f, 4.1f, 5.4f)
+                curve(21f, 26f, 24f, 23.4f, 27f, 24.5f, width = 1.15f)
+                curve(37f, 24.5f, 40f, 23.4f, 43f, 26f, width = 1.15f)
+                curve(28.5f, 41.5f, 30.5f, 39f, 32f, 41.2f)
+                curve(32f, 41.2f, 33.5f, 43.3f, 35.5f, 40.8f)
+                drop(47f, 28f, small = true)
             }
             "surprised" -> {
-                dots(27f, r = 1.8f)
-                curve(21f, 21f, 25f, 18f, 29f, 21f)
-                curve(35f, 21f, 39f, 18f, 43f, 21f)
-                drawOval(ink, Offset(28f, 35f), Size(8f, 11f), style = pen)
+                eyes(30.8f, 5.2f, 6.2f)
+                curve(21.5f, 24.5f, 24.5f, 22f, 27.5f, 24.5f, width = 1.1f)
+                curve(36.5f, 24.5f, 39.5f, 22f, 42.5f, 24.5f, width = 1.1f)
+                drawOval(ink, Offset(29.7f, 38.6f), Size(4.6f, 6f))
+                drawOval(rose.copy(.85f), Offset(30.6f, 42.4f), Size(2.8f, 1.3f))
             }
             "excited" -> {
-                listOf(25f, 39f).forEach { x ->
-                    line(x, 23f, x, 31f)
-                    line(x - 4, 27f, x + 4, 27f)
-                    line(x - 2.5f, 24.5f, x + 2.5f, 29.5f)
-                    line(x + 2.5f, 24.5f, x - 2.5f, 29.5f)
-                }
-                val p =
-                    Path().apply {
-                        moveTo(24f, 36f)
-                        lineTo(40f, 36f)
-                        cubicTo(39f, 50f, 25f, 50f, 24f, 36f)
-                    }
-                drawPath(p, ink)
-                drawOval(Color(0xFFF4B5A6), Offset(28f, 42f), Size(8f, 4f))
+                curve(20.7f, 32f, 24.5f, 24f, 28.3f, 32f)
+                curve(35.7f, 32f, 39.5f, 24f, 43.3f, 32f)
+                openSmile()
+                sparkle(47f, 23f)
             }
             "tense" -> {
-                line(21f, 24f, 29f, 25f)
-                line(35f, 25f, 43f, 24f)
-                dots(29f, r = 1.1f)
-                drawRoundRect(
-                    Color.White.copy(.8f),
-                    Offset(24f, 37f),
-                    Size(16f, 7f),
-                    CornerRadius(2f),
-                )
-                drawRoundRect(ink, Offset(24f, 37f), Size(16f, 7f), CornerRadius(2f), style = pen)
-                line(25f, 40.5f, 39f, 40.5f)
-                line(29f, 38f, 29f, 43f)
-                line(35f, 38f, 35f, 43f)
-            }
-            "restless" -> {
-                drawCircle(ink, 1.5f, Offset(23.5f, 29f))
-                drawCircle(ink, 1.5f, Offset(40.5f, 27f))
-                curve(20f, 24f, 24f, 21f, 28f, 23f)
-                line(36f, 23f, 43f, 21.5f)
-                curve(28f, 41f, 34f, 37f, 39f, 39f)
-                curve(47f, 28f, 51f, 30f, 48f, 32f)
-                curve(49f, 33f, 53f, 35f, 50f, 37f)
-            }
-            "hopeful" -> {
-                dots(28f, lookY = -1f, r = 1.8f)
-                listOf(25f, 39f).forEach { x ->
-                    drawCircle(Color.White, .6f, Offset(x - .4f, 26.2f))
-                }
-                curve(20f, 22f, 24f, 19f, 29f, 21f)
-                curve(35f, 21f, 40f, 19f, 44f, 22f)
-                smile(10f, 4f, 38.5f)
-                line(49f, 19f, 49f, 24f)
-                line(46.5f, 21.5f, 51.5f, 21.5f)
-            }
-            "happy" -> {
-                curve(21f, 29f, 25f, 23f, 29f, 29f)
-                curve(35f, 29f, 39f, 23f, 43f, 29f)
-                smile(16f, 11f, 36.5f)
-            }
-            "sad" -> {
-                curve(20f, 24f, 25f, 25f, 29f, 21f)
-                curve(35f, 21f, 39f, 25f, 44f, 24f)
-                dots(30f, r = 1.3f)
-                frown()
-                drop(44f, 33f, Color(0xFF86B6D7).copy(.85f))
-            }
-            "low" -> {
-                dots(30f, r = 1.1f)
-                line(21f, 28f, 29f, 29f)
-                line(35f, 29f, 43f, 28f)
-                line(28f, 41f, 36f, 41f)
-            }
-            "calm" -> {
-                curve(21f, 28f, 25f, 30f, 29f, 28f)
-                curve(35f, 28f, 39f, 30f, 43f, 28f)
-                smile(8f, 3f, 39f)
-            }
-            "loved" -> {
-                heart(25f, 27f)
-                heart(39f, 27f)
-                smile(11f, 6f, 38f)
-                drawCircle(Color(0xFFE6ACAA).copy(.55f), 3.1f, Offset(19f, 36f))
-                drawCircle(Color(0xFFE6ACAA).copy(.55f), 3.1f, Offset(45f, 36f))
-            }
-            "drained" -> {
-                line(21f, 29f, 29f, 30f)
-                line(35f, 30f, 43f, 29f)
-                curve(22f, 33f, 25f, 35f, 28f, 33f, ink.copy(.35f))
-                curve(36f, 33f, 39f, 35f, 42f, 33f, ink.copy(.35f))
-                curve(28f, 42f, 32f, 40f, 36f, 42f)
-                line(36f, 42f, 39f, 41f)
-            }
-            "tired" -> {
-                curve(21f, 28f, 25f, 31f, 29f, 29f)
-                curve(35f, 29f, 39f, 31f, 43f, 28f)
-                drawOval(ink, Offset(29f, 37f), Size(6f, 9f), style = pen)
-                line(46f, 19f, 51f, 19f)
-                line(51f, 19f, 46f, 24f)
-                line(46f, 24f, 51f, 24f)
-            }
-            "safe" -> {
-                dots(28f, r = 1.4f)
-                smile(13f, 6f, 38f)
-                val p =
+                eyes(32f, 4.8f, 3.8f)
+                curve(21.5f, 26.7f, 24.5f, 26f, 27.5f, 27.2f, width = 1.3f)
+                curve(36.5f, 27.2f, 39.5f, 26f, 42.5f, 26.7f, width = 1.3f)
+                val mouth =
                     Path().apply {
-                        moveTo(47f, 19f)
-                        lineTo(52f, 21f)
-                        lineTo(51.5f, 26f)
-                        quadraticTo(49f, 30f, 46.5f, 26f)
-                        lineTo(46f, 21f)
+                        moveTo(28.5f, 39.8f)
+                        cubicTo(30.5f, 38.5f, 33.5f, 38.5f, 35.5f, 39.8f)
+                        cubicTo(37f, 43.5f, 27f, 43.5f, 28.5f, 39.8f)
                         close()
                     }
-                drawPath(p, ink.copy(.6f), style = Stroke(1f))
-                line(47.5f, 24f, 49f, 25.5f)
-                line(49f, 25.5f, 51f, 22.5f)
+                drawPath(mouth, Color.White.copy(.9f))
+                drawPath(mouth, ink, style = Stroke(1.3f, cap = StrokeCap.Round))
+            }
+            "restless" -> {
+                eye(25.3f, 32.1f, 4.5f, 5.1f)
+                eye(40.3f, 30.8f, 4.5f, 5.1f)
+                curve(21f, 26.7f, 24.5f, 23.4f, 28f, 25.3f, width = 1.15f)
+                curve(37f, 25.3f, 40f, 25.3f, 43f, 24.8f, width = 1.15f)
+                curve(29f, 41.8f, 32f, 39.3f, 35f, 40.5f)
+                curve(48f, 30f, 50f, 31.5f, 48.5f, 33f, ink.copy(.45f), 1.1f)
+            }
+            "hopeful" -> {
+                eyes(30.2f, 5.4f, 6.3f)
+                curve(21f, 24f, 24.5f, 21.7f, 28f, 24f, width = 1.1f)
+                curve(36f, 24f, 39.5f, 21.7f, 43f, 24f, width = 1.1f)
+                smile(6f, 4.4f)
+                drawCircle(Color.White.copy(.7f), .45f, Offset(25.3f, 31.4f))
+                drawCircle(Color.White.copy(.7f), .45f, Offset(40.3f, 31.4f))
+            }
+            "happy" -> {
+                curve(20.8f, 32f, 24.5f, 25.5f, 28.2f, 32f)
+                curve(35.8f, 32f, 39.5f, 25.5f, 43.2f, 32f)
+                tinyW()
+            }
+            "sad" -> {
+                eyes(32f, 4.6f, 5.8f)
+                curve(21f, 26.2f, 24.5f, 26.2f, 27.5f, 23.6f, width = 1.15f)
+                curve(36.5f, 23.6f, 39.5f, 26.2f, 43f, 26.2f, width = 1.15f)
+                curve(29f, 42.3f, 32f, 38.5f, 35f, 42.3f)
+                drop(42f, 38f, small = true)
+            }
+            "low" -> {
+                eyes(33f, 4.5f, 2.8f)
+                curve(21.5f, 27.5f, 24.5f, 27.5f, 27.5f, 26f, ink.copy(.7f), 1.05f)
+                curve(36.5f, 26f, 39.5f, 27.5f, 42.5f, 27.5f, ink.copy(.7f), 1.05f)
+                curve(29.5f, 41.5f, 32f, 41f, 34.5f, 41.5f)
+            }
+            "calm" -> {
+                curve(21f, 31f, 24.5f, 34.5f, 28f, 31f)
+                curve(36f, 31f, 39.5f, 34.5f, 43f, 31f)
+                smile(6f, 2.5f)
+            }
+            "loved" -> {
+                heart(24.5f)
+                heart(39.5f)
+                smile(7f, 5f, 40.5f)
+                cheek(17.5f, .25f)
+                cheek(46.5f, .25f)
+            }
+            "drained" -> {
+                drawOval(ink.copy(.07f), Offset(21f, 33.5f), Size(7f, 2.4f))
+                drawOval(ink.copy(.07f), Offset(36f, 33.5f), Size(7f, 2.4f))
+                curve(21f, 31.8f, 24.5f, 32.8f, 28f, 32.3f)
+                curve(36f, 32.3f, 39.5f, 32.8f, 43f, 31.8f)
+                curve(29f, 42f, 31f, 40.7f, 32.5f, 42f)
+                curve(32.5f, 42f, 34f, 43f, 35.5f, 41.8f)
+            }
+            "tired" -> {
+                curve(21f, 31f, 24.5f, 35f, 28f, 32f)
+                curve(36f, 32f, 39.5f, 35f, 43f, 31f)
+                curve(21.5f, 26.3f, 24.5f, 25.2f, 27.5f, 26.3f, ink.copy(.45f), 1f)
+                drawOval(ink, Offset(29.7f, 38.8f), Size(4.6f, 6.6f))
+                drawOval(rose, Offset(30.7f, 43.1f), Size(2.6f, 1.4f))
+            }
+            "safe" -> {
+                eyes(31.5f, 4.1f, 4.4f)
+                smile(8f, 5f)
+                curve(21.5f, 25.7f, 24.5f, 24.5f, 27.5f, 25.7f, ink.copy(.5f), 1f)
+                curve(36.5f, 25.7f, 39.5f, 24.5f, 42.5f, 25.7f, ink.copy(.5f), 1f)
             }
             "relieved" -> {
-                curve(21f, 27f, 25f, 32f, 29f, 28f)
-                curve(35f, 28f, 39f, 32f, 43f, 27f)
-                drawOval(ink, Offset(29f, 38f), Size(6f, 3.8f), style = pen)
-                curve(38f, 40f, 44f, 36f, 47f, 39f, ink.copy(.55f))
-                curve(40f, 43f, 46f, 40f, 49f, 43f, ink.copy(.4f))
+                curve(21f, 30.5f, 24.5f, 35.8f, 28f, 31f)
+                curve(36f, 31f, 39.5f, 35.8f, 43f, 30.5f)
+                drawOval(ink, Offset(30f, 39.8f), Size(4f, 2.8f))
+                curve(38.5f, 40.6f, 42f, 38.5f, 44f, 40.3f, ink.copy(.38f), 1f)
             }
             else -> {
-                dots()
-                line(28f, 40f, 36f, 40f)
+                eyes()
+                smile()
             }
         }
     }
