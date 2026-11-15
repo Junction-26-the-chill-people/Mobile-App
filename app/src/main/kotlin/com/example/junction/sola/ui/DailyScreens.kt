@@ -13,6 +13,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -133,9 +134,10 @@ fun TodayScreen(s: SolaState, store: SolaStore, navigate: (SolaScreen) -> Unit) 
         GlassOrb(
             Modifier.size(250.dp)
                 .semantics { contentDescription = "Check in. How are you?" }
-                .clickable { navigate(SolaScreen.CHECK_IN) },
+                .motionClick { navigate(SolaScreen.CHECK_IN) },
             Color(0xFFBCCDB5),
             sceneTime(),
+            halo = true,
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Eyebrow("Check in")
@@ -216,13 +218,14 @@ fun CheckInScreen(
                     horizontalArrangement = Arrangement.spacedBy(7.dp),
                 ) {
                     row.forEach { mood ->
+                        val selection by motionFloat(if (selectedId == mood.id) 1f else 0f)
                         Column(
                             Modifier.weight(1f)
                                 .semantics {
                                     contentDescription = "${mood.label} mood"
                                     selected = selectedId == mood.id
                                 }
-                                .clickable { selectedId = mood.id },
+                                .motionClick { selectedId = mood.id },
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
                             MoodFace(
@@ -230,11 +233,11 @@ fun CheckInScreen(
                                 Modifier.fillMaxWidth()
                                     .aspectRatio(1f)
                                     .padding(3.dp)
-                                    .then(
-                                        if (selectedId == mood.id)
-                                            Modifier.border(1.4.dp, Ink.copy(.55f), CircleShape)
-                                        else Modifier
-                                    ),
+                                    .graphicsLayer {
+                                        scaleX = 1f + .025f * selection
+                                        scaleY = scaleX
+                                    }
+                                    .border(1.4.dp, Ink.copy(.55f * selection), CircleShape),
                             )
                             Text(
                                 mood.label,
@@ -247,9 +250,11 @@ fun CheckInScreen(
                 }
             }
         } else {
+            val orbSize by motionFloat((125 + level * 17).toFloat(), 300)
+            val orbTint by motionColor(Color(chosenMood.color), 300)
             GlassOrb(
-                Modifier.size((125 + level * 17).dp).padding(vertical = 8.dp),
-                Color(chosenMood.color),
+                Modifier.size(orbSize.dp).padding(vertical = 8.dp),
+                orbTint,
                 sceneTime(),
             ) {
                 Text("$level", fontSize = 43.sp, fontWeight = FontWeight.Light)
@@ -527,7 +532,7 @@ fun GardenScreen(
         )
         Spacer(Modifier.height(16.dp))
         Title("Your garden", "Branches grow as you log · butterflies bring people close")
-        GardenArtwork(s, Modifier.padding(top = 4.dp), replay, { day = it })
+        GardenArtwork(s, Modifier.padding(top = 4.dp), replay, { day = it }, { butterfly = it })
         val count = s.loggedDates.count { it.startsWith(SolaDates.key().take(7)) }
         Eyebrow(SolaDates.format(System.currentTimeMillis(), "MMMM"))
         Text(

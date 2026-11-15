@@ -153,15 +153,17 @@ fun OnboardingScreen(
                         items.forEachIndexed { index, item ->
                             val selected = item in state.interests
                             Column(
-                                Modifier.widthIn(max = 145.dp).clickable {
-                                    store.update {
-                                        it.copy(
-                                            interests =
-                                                if (selected) it.interests - item
-                                                else it.interests + item
-                                        )
-                                    }
-                                },
+                                Modifier.widthIn(max = 145.dp)
+                                    .softFloat((row * 2 + index) * .17f)
+                                    .clickable {
+                                        store.update {
+                                            it.copy(
+                                                interests =
+                                                    if (selected) it.interests - item
+                                                    else it.interests + item
+                                            )
+                                        }
+                                    },
                                 horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
                                 GlassOrb(
@@ -276,7 +278,7 @@ fun OnboardingScreen(
                 Spacer(Modifier.height(28.dp))
                 Title("Who’s in your corner?", "A familiar face. A gentle connection.")
                 Spacer(Modifier.height(24.dp))
-                GlassOrb(Modifier.size(130.dp), Lavender, sceneTime()) {
+                GlassOrb(Modifier.size(130.dp), Lavender, sceneTime(), halo = true) {
                     SolaIcon("butterfly", Modifier.size(40.dp), Color(0xFF9A8DAB))
                 }
                 Spacer(Modifier.height(20.dp))

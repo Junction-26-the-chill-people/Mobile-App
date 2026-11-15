@@ -69,6 +69,7 @@ fun GardenArtwork(
     modifier: Modifier = Modifier,
     replay: Int = 0,
     onDay: (String) -> Unit = {},
+    onButterfly: (Butterfly) -> Unit = {},
 ) {
     val context = LocalContext.current
     val branches = remember {
@@ -99,9 +100,48 @@ fun GardenArtwork(
         }
     }
     val month = SolaDates.key().take(7)
+    val ground = remember {
+        nativePath("M 0 276 Q 96 260 198 272 T 390 268 L 390 340 L 0 340 Z").asComposePath()
+    }
+    val foreground = remember {
+        nativePath("M 0 290 Q 195 274 390 290 L 390 340 L 0 340 Z").asComposePath()
+    }
+    val horizon = remember {
+        nativePath("M 22 279 Q 88 276 146 278 Q 195 279 252 276 Q 312 275 368 278")
+    }
+    val sapling = remember { nativePath("M 195 278 Q 194 268 195 258") }
+    val trunk = remember { nativePath("M 195 278 Q 193.5 244 195 214 Q 195.5 204 195 198") }
     val days = state.loggedDates.filter { it.startsWith(month) }.takeLast(31)
-    val time = key(replay) { sceneTime() }
     val motion = LocalSceneMotion.current
+    val cache = LocalGardenGrowth.current
+    val memory =
+        remember(cache, month, state.demo) {
+            cache?.getOrPut("${state.demo}:$month") { GardenGrowthMemory() } ?: GardenGrowthMemory()
+        }
+    val plan =
+        remember(memory, days.size, replay) {
+            val replaying = replay != 0 && memory.replay != replay
+            GardenGrowthPlan(
+                    if (replaying) 0 else memory.days.coerceAtMost(days.size),
+                    days.size,
+                    replaying,
+                )
+                .also { memory.replay = replay }
+        }
+    val time = key(plan) { sceneTime() }
+    val flowerPlan =
+        remember(memory, state.flowerCount, replay) {
+            GardenGrowthPlan(
+                if (plan.replaying) 0 else memory.flowers.coerceAtMost(state.flowerCount),
+                state.flowerCount,
+            )
+        }
+    val flowerTime = key(flowerPlan) { sceneTime() }
+    SideEffect {
+        if (!motion || time >= plan.duration) memory.days = days.size
+        if (!motion || flowerTime >= .9f + (flowerPlan.target - flowerPlan.from) * .12f)
+            memory.flowers = state.flowerCount
+    }
     BoxWithConstraints(modifier.fillMaxWidth().aspectRatio(390f / 340f)) {
         val unit = maxWidth / 390f
         Canvas(Modifier.fillMaxSize()) {
@@ -116,8 +156,7 @@ fun GardenArtwork(
                     Offset(195f, 146f),
                 )
                 drawPath(
-                    nativePath("M 0 276 Q 96 260 198 272 T 390 268 L 390 340 L 0 340 Z")
-                        .asComposePath(),
+                    ground,
                     Brush.verticalGradient(
                         listOf(Color(0xFFB7C9B5).copy(.30f), Color.Transparent),
                         270f,
@@ -125,7 +164,7 @@ fun GardenArtwork(
                     ),
                 )
                 drawPath(
-                    nativePath("M 0 290 Q 195 274 390 290 L 390 340 L 0 340 Z").asComposePath(),
+                    foreground,
                     Brush.verticalGradient(
                         listOf(Color(0xFFBFCDB6).copy(.18f), Color.Transparent),
                         280f,
@@ -133,19 +172,19 @@ fun GardenArtwork(
                     ),
                 )
                 growPath(
-                    nativePath("M 22 279 Q 88 276 146 278 Q 195 279 252 276 Q 312 275 368 278"),
+                    horizon,
                     Color(0xFF9CA88B).copy(.3f),
                     .7f,
                 )
                 val branchColor = Color(0xFF887260)
-                growPath(
-                    nativePath(
-                        if (days.isEmpty()) "M 195 278 Q 194 268 195 258"
-                        else "M 195 278 Q 193.5 244 195 214 Q 195.5 204 195 198"
-                    ),
-                    branchColor,
-                    5f,
-                )
+                growPath(sapling, branchColor, 5f)
+                if (days.isNotEmpty())
+                    growPath(
+                        trunk,
+                        branchColor,
+                        5f,
+                        if (!motion) 1f else plan.trunk(time),
+                    )
                 if (days.isEmpty()) {
                     rotate(-35f, Offset(195f, 260f)) {
                         drawOval(Color(0xFFB9CBB0), Offset(182f, 248f), Size(13f, 7f))
@@ -155,23 +194,34 @@ fun GardenArtwork(
                     }
                 }
                 branches.take(days.size.coerceAtMost(16)).forEachIndexed { i, b ->
-                    val p = if (motion) ((time - i * .12f) * 1.8f).coerceIn(0f, 1f) else 1f
+                    val p = if (motion) plan.branch(i, time) else 1f
                     growPath(b.path, branchColor.copy(.88f), b.width, p)
-                    b.twigs.forEach { t ->
+                    b.twigs.forEachIndexed { twigIndex, t ->
                         growPath(
                             t.path,
                             branchColor.copy(.65f),
                             .85f,
-                            (p * 1.8f - .65f).coerceIn(0f, 1f),
+                            if (!motion || i < plan.from) 1f
+                            else
+                                SolaMotion.growth(
+                                    (time - plan.start(i) - .18f - twigIndex * .08f) / .78f
+                                ),
                         )
-                        if (p > .7f)
+                        val bud = if (motion) plan.bud(i, twigIndex, time) else 1f
+                        if (bud > 0f)
                             rotate(t.angle + sin(time * .6f + i) * 2f, Offset(t.x, t.y)) {
-                                drawOval(t.color.copy(.8f), Offset(t.x - 3, t.y - 7), Size(6f, 11f))
-                                drawOval(
-                                    Color.White.copy(.35f),
-                                    Offset(t.x - 2, t.y - 6),
-                                    Size(2f, 7f),
-                                )
+                                scale(bud, bud, Offset(t.x, t.y)) {
+                                    drawOval(
+                                        t.color.copy(.8f),
+                                        Offset(t.x - 3, t.y - 7),
+                                        Size(6f, 11f),
+                                    )
+                                    drawOval(
+                                        Color.White.copy(.35f),
+                                        Offset(t.x - 2, t.y - 6),
+                                        Size(2f, 7f),
+                                    )
+                                }
                             }
                     }
                 }
@@ -179,21 +229,25 @@ fun GardenArtwork(
                     val b = branches[i % 16]
                     val x = if (i < 16) b.x else b.twigs.first().x
                     val y = if (i < 16) b.y else b.twigs.first().y
-                    val p =
-                        if (motion) ((time - i.coerceAtMost(16) * .12f) * 2f - .5f).coerceIn(0f, 1f)
-                        else 1f
+                    val p = if (motion) plan.leaf(i, time) else 1f
                     val radius = (if (i < 16) b.radius else 13f) * p
                     if (radius > 0f) {
                         val mood = state.moodFor(day)
                         val color = Color(SolaContent.color(mood?.quadrant ?: "sage"))
                         val center = Offset(x, y)
+                        val haloRadius =
+                            radius *
+                                (1.65f +
+                                    if (motion && i == days.lastIndex)
+                                        .18f * SolaMotion.cycle(time, 3.1f)
+                                    else 0f)
                         drawCircle(
                             Brush.radialGradient(
                                 listOf(color.copy(.4f), Color.Transparent),
                                 center,
-                                radius * 1.65f,
+                                haloRadius,
                             ),
-                            radius * 1.65f,
+                            haloRadius,
                             center,
                         )
                         drawCircle(
@@ -242,20 +296,35 @@ fun GardenArtwork(
                         )[i]
                     val y = 290f + (i % 3) * 6
                     val sway = sin(time * .8f + i) * 1.5f
-                    growPath(
-                        nativePath("M $x ${y+8} Q ${x+sway} $y ${x+sway} ${y-15}"),
-                        Color(0xFF91A77F),
-                        .9f,
-                    )
-                    val petal =
-                        listOf(Color(0xFFF2B8C6), Color(0xFFF6D39A), Lavender, Color(0xFFB9D6EB))[
-                            i % 4]
-                    repeat(5) { k ->
-                        rotate(k * 72f, Offset(x + sway, y - 15)) {
-                            drawOval(petal, Offset(x + sway - 2.5f, y - 22), Size(5f, 8f))
+                    val flowerScale =
+                        if (!motion || i < flowerPlan.from) 1f
+                        else
+                            SolaMotion.bloom(
+                                (flowerTime - .12f - (i - flowerPlan.from) * .12f) / .62f
+                            )
+                    scale(flowerScale, flowerScale, Offset(x, y + 8)) {
+                        drawPath(
+                            Path().apply {
+                                moveTo(x, y + 8)
+                                quadraticTo(x + sway, y, x + sway, y - 15)
+                            },
+                            Color(0xFF91A77F),
+                            style = Stroke(.9f, cap = StrokeCap.Round),
+                        )
+                        val petal =
+                            listOf(
+                                Color(0xFFF2B8C6),
+                                Color(0xFFF6D39A),
+                                Lavender,
+                                Color(0xFFB9D6EB),
+                            )[i % 4]
+                        repeat(5) { k ->
+                            rotate(k * 72f, Offset(x + sway, y - 15)) {
+                                drawOval(petal, Offset(x + sway - 2.5f, y - 22), Size(5f, 8f))
+                            }
                         }
+                        drawCircle(Color(0xFFFFF4D6), 2f, Offset(x + sway, y - 15))
                     }
-                    drawCircle(Color(0xFFFFF4D6), 2f, Offset(x + sway, y - 15))
                 }
             }
         }
@@ -271,6 +340,22 @@ fun GardenArtwork(
                             "Memory for $day, ${state.moodFor(day)?.label ?: "diary entry"}"
                     }
                     .clickable { onDay(day) }
+            )
+        }
+        state.butterflies.take(4).forEachIndexed { index, butterfly ->
+            val point =
+                listOf(Offset(48f, 146f), Offset(338f, 112f), Offset(88f, 66f), Offset(298f, 48f))[
+                    index]
+            ButterflyArtwork(
+                Modifier.offset(unit * point.x - 24.dp, unit * point.y - 24.dp)
+                    .size(48.dp)
+                    .semantics { contentDescription = "Butterfly from ${butterfly.friend}" }
+                    .motionClick { onButterfly(butterfly) },
+                tint =
+                    listOf(Lavender, Color(0xFFE4B8C9), Color(0xFFB5CFC4), Color(0xFFE6C99F))[
+                        index],
+                floating = true,
+                phase = index * .7f,
             )
         }
     }

@@ -13,6 +13,8 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 On Windows use `gradlew.bat`. The installed app is **Junction** (`com.example.junction`). The welcome draws its original handwritten **hello**, then fades in the subtitle; tap the tree or lettering to replay. Begin your own profile or choose **Explore the sample garden**. Photos use Android’s picker; voice uses the phone’s speech-to-text service when available.
 
+The original frontend’s motion is restored natively: drifting ambient glows, a breathing home-orb halo, floating interest bubbles, staged trunk/branch/bud growth, blooming memories and flowers, fluttering butterflies, and soft press/selection/recap transitions. Returning to the garden keeps existing growth; **Replay growth** starts it again. Motion pauses when the app is not resumed and works at zero Android animator scale without changing system settings. See [MOTION.md](MOTION.md).
+
 ## Telegram over USB
 
 The small Node 20+ bridge is in [telegram-bridge/](telegram-bridge/README.md). Copy its `.env.example` to `.env`, add the bot token locally, then:

@@ -9,7 +9,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
@@ -214,7 +213,7 @@ fun SolaApp(
                     .widthIn(max = 600.dp)
                     .align(Alignment.TopCenter)
             ) {
-                Box(Modifier.weight(1f)) {
+                Box(Modifier.weight(1f).softEntrance(screenName)) {
                     when (screen) {
                         SolaScreen.WELCOME,
                         SolaScreen.ACCOUNT,
@@ -442,7 +441,7 @@ private fun BottomNavigation(current: SolaScreen, navigate: (SolaScreen) -> Unit
                         contentDescription = label
                         selected = active
                     }
-                    .clickable { navigate(screen) },
+                    .motionClick { navigate(screen) },
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {

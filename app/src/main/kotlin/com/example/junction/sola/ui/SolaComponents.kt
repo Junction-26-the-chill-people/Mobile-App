@@ -3,9 +3,11 @@ package com.example.junction.sola.ui
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -38,7 +40,6 @@ import androidx.compose.ui.window.DialogProperties
 import java.io.File
 import kotlin.math.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 
 val Ink = Color(0xFF28322B)
@@ -49,7 +50,11 @@ val LocalSceneMotion = staticCompositionLocalOf { true }
 
 @Composable
 fun SolaTheme(motion: Boolean = true, content: @Composable () -> Unit) {
-    CompositionLocalProvider(LocalSceneMotion provides motion) {
+    val gardenGrowth = remember { mutableMapOf<String, GardenGrowthMemory>() }
+    CompositionLocalProvider(
+        LocalSceneMotion provides motion,
+        LocalGardenGrowth provides gardenGrowth,
+    ) {
         MaterialTheme(
             colorScheme =
                 lightColorScheme(
@@ -77,21 +82,13 @@ fun SolaTheme(motion: Boolean = true, content: @Composable () -> Unit) {
  */
 @Composable
 fun sceneTime(): Float {
-    var seconds by remember { mutableFloatStateOf(0f) }
-    val enabled = LocalSceneMotion.current
-    LaunchedEffect(enabled) {
-        if (!enabled) return@LaunchedEffect
-        var start = 0L
-        while (isActive) withFrameNanos { now ->
-            if (start == 0L) start = now
-            seconds = (now - start) / 1_000_000_000f
-        }
-    }
-    return seconds
+    return sceneClock().value
 }
 
 @Composable
 fun AmbientSurface(tone: String = "sage", content: @Composable BoxScope.() -> Unit) {
+    val clock = sceneClock()
+    val motion = LocalSceneMotion.current
     val palette =
         when (tone) {
             "dawn" -> listOf(Color(0xFFFDF9F4), Color(0xFFF7EFE9), Color(0xFFEEEBF5))
@@ -100,25 +97,49 @@ fun AmbientSurface(tone: String = "sage", content: @Composable BoxScope.() -> Un
             "warm" -> listOf(Color(0xFFFCF8F2), Color(0xFFF8EFE3), Color(0xFFF5E8DC))
             else -> listOf(Color(0xFFFAF8F2), Color(0xFFF1F4EC), Color(0xFFEAF0EA))
         }
-    Box(Modifier.fillMaxSize().background(Brush.verticalGradient(palette))) {
+    val background = palette.map { motionColor(it, 700).value }
+    Box(Modifier.fillMaxSize().background(Brush.verticalGradient(background))) {
         Canvas(Modifier.matchParentSize()) {
+            val time = if (motion) clock.value else 0f
+            val drift =
+                if (motion)
+                    Offset(
+                        sin(time * 2 * PI.toFloat() / 9) * 5.dp.toPx(),
+                        -8.dp.toPx() * SolaMotion.cycle(time, 9f),
+                    )
+                else Offset.Zero
+            val float = if (motion) -10.dp.toPx() * SolaMotion.cycle(time, 7f) else 0f
+            val breath = if (motion) SolaMotion.cycle(time, 5.5f) else 0f
+            val peachCenter = Offset(size.width * .13f, size.height * .3f + float)
+            val lavenderCenter = Offset(size.width * .95f, size.height * .64f) + drift
             drawCircle(
                 Brush.radialGradient(
                     listOf(Color(0xFFF2D4BF).copy(.32f), Color.Transparent),
-                    Offset(size.width * .13f, size.height * .3f),
+                    peachCenter,
                     size.width * .8f,
                 ),
                 size.width * .8f,
-                Offset(size.width * .13f, size.height * .3f),
+                peachCenter,
             )
             drawCircle(
                 Brush.radialGradient(
                     listOf(Lavender.copy(.20f), Color.Transparent),
-                    Offset(size.width * .95f, size.height * .64f),
+                    lavenderCenter,
                     size.width,
                 ),
                 size.width,
-                Offset(size.width * .95f, size.height * .64f),
+                lavenderCenter,
+            )
+            val auraCenter = Offset(size.width * .3f, size.height * .92f)
+            val auraRadius = size.width * (.62f + breath * .05f)
+            drawCircle(
+                Brush.radialGradient(
+                    listOf(Sage.copy(.09f + breath * .035f), Color.Transparent),
+                    auraCenter,
+                    auraRadius,
+                ),
+                auraRadius,
+                auraCenter,
             )
         }
         content()
@@ -200,9 +221,11 @@ fun PrimaryButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
 ) {
+    val interaction = remember { MutableInteractionSource() }
     Button(
         onClick,
-        modifier.heightIn(min = 50.dp),
+        modifier.pressMotion(interaction).heightIn(min = 50.dp),
+        interactionSource = interaction,
         enabled = enabled,
         shape = RoundedCornerShape(100),
         colors =
@@ -220,11 +243,17 @@ fun SoftButton(
     modifier: Modifier = Modifier,
     icon: String? = null,
 ) {
+    val interaction = remember { MutableInteractionSource() }
     Row(
         modifier
+            .pressMotion(interaction)
             .heightIn(min = 48.dp)
             .glass(24.dp)
-            .clickable(onClick = onClick)
+            .clickable(
+                interactionSource = interaction,
+                indication = LocalIndication.current,
+                onClick = onClick,
+            )
             .padding(horizontal = 18.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
@@ -245,12 +274,15 @@ fun RoundButton(
     dark: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
+    val interaction = remember { MutableInteractionSource() }
     IconButton(
         onClick,
         modifier
+            .pressMotion(interaction)
             .size(48.dp)
             .then(if (dark) Modifier.clip(CircleShape).background(Ink) else Modifier.glass(24.dp))
             .semantics { contentDescription = label },
+        interactionSource = interaction,
     ) {
         SolaIcon(icon, Modifier.size(21.dp), if (dark) Color.White else Ink)
     }
@@ -263,11 +295,15 @@ fun ChoiceChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val interaction = remember { MutableInteractionSource() }
+    val background by motionColor(if (selected) Ink else Color.White.copy(.55f))
+    val foreground by motionColor(if (selected) Color.White else Muted)
     Surface(
         onClick,
-        modifier.heightIn(min = 44.dp),
+        modifier.pressMotion(interaction).heightIn(min = 44.dp),
+        interactionSource = interaction,
         shape = RoundedCornerShape(22.dp),
-        color = if (selected) Ink else Color.White.copy(.55f),
+        color = background,
         border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(.75f)),
     ) {
         Box(
@@ -276,7 +312,7 @@ fun ChoiceChip(
         ) {
             Text(
                 label,
-                color = if (selected) Color.White else Muted,
+                color = foreground,
                 fontSize = 12.sp,
                 textAlign = TextAlign.Center,
             )
@@ -397,12 +433,30 @@ fun GlassOrb(
     modifier: Modifier = Modifier,
     tint: Color = Sage,
     time: Float = 0f,
+    halo: Boolean = false,
     content: @Composable BoxScope.() -> Unit = {},
 ) {
     Box(modifier, contentAlignment = Alignment.Center) {
         Canvas(Modifier.matchParentSize()) {
             val r = size.minDimension * .44f * (1f + .014f * sin(time * .9f))
             val c = center + Offset(0f, sin(time * .7f) * 3f)
+            if (halo) {
+                val breath = SolaMotion.cycle(time, 5.5f)
+                val haloRadius = r * (1.28f + .11f * breath)
+                drawCircle(
+                    Brush.radialGradient(
+                        listOf(
+                            Color(0xFFF2E2B8).copy(.24f + .08f * breath),
+                            tint.copy(.12f),
+                            Color.Transparent,
+                        ),
+                        c,
+                        haloRadius,
+                    ),
+                    haloRadius,
+                    c,
+                )
+            }
             drawCircle(
                 Brush.radialGradient(listOf(tint.copy(.20f), Color.Transparent), c, r * 1.30f),
                 r * 1.30f,
@@ -442,6 +496,10 @@ fun GlassOrb(
 
 @Composable
 fun SolaIcon(name: String, modifier: Modifier = Modifier.size(22.dp), tint: Color = Ink) {
+    if (name == "butterfly") {
+        ButterflyArtwork(modifier, tint)
+        return
+    }
     Canvas(modifier) {
         scale(size.width / 24f, size.height / 24f, Offset.Zero) {
             val stroke = Stroke(1.45f, cap = StrokeCap.Round, join = StrokeJoin.Round)

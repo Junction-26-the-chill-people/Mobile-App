@@ -256,8 +256,8 @@ fun SupportScreen(
     val time = sceneTime()
     fun dial(phone: String) {
         runCatching {
-                context.startActivity(Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", phone, null)))
-            }
+            context.startActivity(Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", phone, null)))
+        }
             .onFailure { notify("No dialer is available on this device.") }
     }
     if (callPicker)
@@ -377,15 +377,15 @@ fun SupportScreen(
             "Find support · MIELI, Finland",
             {
                 runCatching {
-                        context.startActivity(
-                            Intent(
-                                Intent.ACTION_VIEW,
-                                Uri.parse(
-                                    "https://mieli.fi/tukea-ja-apua/kriisipuhelin?oai_link_source=model_response_hotline"
-                                ),
-                            )
+                    context.startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse(
+                                "https://mieli.fi/tukea-ja-apua/kriisipuhelin?oai_link_source=model_response_hotline"
+                            ),
                         )
-                    }
+                    )
+                }
                     .onFailure { notify("No browser is available.") }
             },
             Modifier.fillMaxWidth().padding(top = 18.dp, bottom = 24.dp),
@@ -411,110 +411,122 @@ fun RecapScreen(s: SolaState, store: SolaStore, back: () -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(5.dp),
         ) {
             repeat(6) { index ->
-                Box(
-                    Modifier.weight(1f)
-                        .height(3.dp)
-                        .background(if (index <= slide) Ink.copy(.6f) else Color.White)
-                )
+                val progressTint by
+                    motionColor(if (index <= slide) Ink.copy(.6f) else Color.White, 300)
+                Box(Modifier.weight(1f).height(3.dp).background(progressTint))
             }
         }
         TopBar(back = back, label = SolaDates.format(System.currentTimeMillis(), "MMMM"))
         Spacer(Modifier.height(22.dp))
-        when (slide) {
-            0 -> {
-                Eyebrow("A moment to look back")
-                Spacer(Modifier.height(18.dp))
-                Title("Your month,\nwrapped.", "A collection of small moments. All yours.")
-                GardenArtwork(s, Modifier.padding(vertical = 20.dp))
-                Text(
-                    "${days.size} days of showing up",
-                    fontSize = 19.sp,
-                    fontWeight = FontWeight.Light,
-                )
-            }
-            1 -> {
-                Title("The moments\nyou kept.", "Some things deserve a little space.")
-                Spacer(Modifier.height(28.dp))
-                val photo = notes.lastOrNull { it.photo != null }
-                if (photo != null) SolaPhoto(photo.photo, Modifier.fillMaxWidth().height(240.dp))
-                GlassCard(Modifier.fillMaxWidth().padding(top = 16.dp)) {
+        Column(
+            Modifier.fillMaxWidth().softEntrance(slide),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            when (slide) {
+                0 -> {
+                    Eyebrow("A moment to look back")
+                    Spacer(Modifier.height(18.dp))
+                    Title("Your month,\nwrapped.", "A collection of small moments. All yours.")
+                    GardenArtwork(s, Modifier.padding(vertical = 20.dp))
                     Text(
-                        notes.lastOrNull()?.text?.takeIf { it.isNotBlank() }
-                            ?: "Your next diary entry will find a home here.",
+                        "${days.size} days of showing up",
                         fontSize = 19.sp,
-                        lineHeight = 28.sp,
                         fontWeight = FontWeight.Light,
                     )
                 }
-            }
-            2 -> {
-                Title("Small things.\nReal growth.", "The things you made room for.")
-                GlassOrb(
-                    Modifier.size(220.dp).padding(top = 20.dp),
-                    Color(0xFFE2C4AB),
-                    sceneTime(),
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        SolaIcon("flower", Modifier.size(48.dp), Color(0xFFB6938F))
+                1 -> {
+                    Title("The moments\nyou kept.", "Some things deserve a little space.")
+                    Spacer(Modifier.height(28.dp))
+                    val photo = notes.lastOrNull { it.photo != null }
+                    if (photo != null)
+                        SolaPhoto(photo.photo, Modifier.fillMaxWidth().height(240.dp))
+                    GlassCard(Modifier.fillMaxWidth().padding(top = 16.dp)) {
                         Text(
-                            "${s.completedGoals.size+monthTasks.size}",
-                            fontSize = 40.sp,
+                            notes.lastOrNull()?.text?.takeIf { it.isNotBlank() }
+                                ?: "Your next diary entry will find a home here.",
+                            fontSize = 19.sp,
+                            lineHeight = 28.sp,
                             fontWeight = FontWeight.Light,
                         )
                     }
                 }
-                GlassCard(Modifier.fillMaxWidth().padding(top = 24.dp)) {
-                    (s.completedGoals.toList() + monthTasks.map { it.title }).take(5).forEach {
-                        Body("✧  $it")
-                    }
-                    if (s.completedGoals.isEmpty() && monthTasks.isEmpty())
-                        Body("Tend an intention or mark a little win to grow a flower.")
-                }
-            }
-            3 -> {
-                Title("Every feeling\nhad a place.", "Your check-ins over the past 28 days.")
-                GlassCard(Modifier.fillMaxWidth().padding(top = 30.dp)) {
-                    MoodChart(s.moods, 28)
-                    Body("There was room for all of it. You can explore each day in Statistics.")
-                }
-            }
-            4 -> {
-                Title("A little closer.", "The people you’ve made space for.")
-                GlassOrb(Modifier.size(230.dp).padding(top = 20.dp), Lavender, sceneTime()) {
-                    SolaIcon("butterfly", Modifier.size(74.dp), Color(0xFFA18AB9))
-                }
-                GlassCard(Modifier.fillMaxWidth().padding(top = 24.dp)) {
-                    if (s.friends.isEmpty())
-                        Body("Your circle can start with one person, whenever you’re ready.")
-                    else
-                        s.friends.forEach {
-                            Text(it.name, fontSize = 19.sp, fontWeight = FontWeight.Light)
+                2 -> {
+                    Title("Small things.\nReal growth.", "The things you made room for.")
+                    GlassOrb(
+                        Modifier.size(220.dp).padding(top = 20.dp),
+                        Color(0xFFE2C4AB),
+                        sceneTime(),
+                        halo = true,
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            SolaIcon("flower", Modifier.size(48.dp), Color(0xFFB6938F))
+                            Text(
+                                "${s.completedGoals.size+monthTasks.size}",
+                                fontSize = 40.sp,
+                                fontWeight = FontWeight.Light,
+                            )
                         }
+                    }
+                    GlassCard(Modifier.fillMaxWidth().padding(top = 24.dp)) {
+                        (s.completedGoals.toList() + monthTasks.map { it.title }).take(5).forEach {
+                            Body("✧  $it")
+                        }
+                        if (s.completedGoals.isEmpty() && monthTasks.isEmpty())
+                            Body("Tend an intention or mark a little win to grow a flower.")
+                    }
                 }
-            }
-            5 -> {
-                Title("Carry something\ngentle forward.", "An intention for the days ahead.")
-                Spacer(Modifier.height(32.dp))
-                SolaField(
-                    "What would you like to make room for?",
-                    intention,
-                    { intention = it },
-                    multiline = true,
-                )
-                Body(
-                    "A wish, not a promise. You can always change it.",
-                    Modifier.padding(vertical = 22.dp),
-                    true,
-                )
-                PrimaryButton(
-                    "Keep this intention",
-                    {
-                        store.update { it.copy(monthlyIntention = intention.trim()) }
-                        back()
-                    },
-                    Modifier.fillMaxWidth(),
-                )
-                TextButton({ slide = 0 }) { Text("Replay this month", color = Muted) }
+                3 -> {
+                    Title("Every feeling\nhad a place.", "Your check-ins over the past 28 days.")
+                    GlassCard(Modifier.fillMaxWidth().padding(top = 30.dp)) {
+                        MoodChart(s.moods, 28)
+                        Body(
+                            "There was room for all of it. You can explore each day in Statistics."
+                        )
+                    }
+                }
+                4 -> {
+                    Title("A little closer.", "The people you’ve made space for.")
+                    GlassOrb(
+                        Modifier.size(230.dp).padding(top = 20.dp),
+                        Lavender,
+                        sceneTime(),
+                        halo = true,
+                    ) {
+                        SolaIcon("butterfly", Modifier.size(74.dp), Color(0xFFA18AB9))
+                    }
+                    GlassCard(Modifier.fillMaxWidth().padding(top = 24.dp)) {
+                        if (s.friends.isEmpty())
+                            Body("Your circle can start with one person, whenever you’re ready.")
+                        else
+                            s.friends.forEach {
+                                Text(it.name, fontSize = 19.sp, fontWeight = FontWeight.Light)
+                            }
+                    }
+                }
+                5 -> {
+                    Title("Carry something\ngentle forward.", "An intention for the days ahead.")
+                    Spacer(Modifier.height(32.dp))
+                    SolaField(
+                        "What would you like to make room for?",
+                        intention,
+                        { intention = it },
+                        multiline = true,
+                    )
+                    Body(
+                        "A wish, not a promise. You can always change it.",
+                        Modifier.padding(vertical = 22.dp),
+                        true,
+                    )
+                    PrimaryButton(
+                        "Keep this intention",
+                        {
+                            store.update { it.copy(monthlyIntention = intention.trim()) }
+                            back()
+                        },
+                        Modifier.fillMaxWidth(),
+                    )
+                    TextButton({ slide = 0 }) { Text("Replay this month", color = Muted) }
+                }
             }
         }
         Spacer(Modifier.height(30.dp))
